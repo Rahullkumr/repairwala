@@ -21,7 +21,11 @@ Built for DEV's [Hacktoberfest Open-Source AI Challenge, Week 2: Side Hustle](ht
 |---|---|---|---|
 | ![Open jobs sorted by pickup date: mixer due today, fan tomorrow, submersible after](docs/images/home.png) | ![Job #7: a submersible, rating plate photo, customer, fault, estimate and pickup date](docs/images/detail.png) | ![The job form with phone, photos, the big Speak button, name and village](docs/images/form.png) | ![The job list in dark mode](docs/images/home-dark.png) |
 
-<sub>Screenshots use made-up customers.</sub>
+| "It's fixed": the message | Voice note and WhatsApp |
+|---|---|
+| ![The customer message in Hindi: repaired, total ₹1, UPI ID, shop name and job number, with the UPI QR below](docs/images/notify.png) | ![The UPI QR, the play-voice-note button, and the big Send on WhatsApp button](docs/images/notify-send.png) |
+
+<sub>Screenshots use made-up customers and a ₹1 test amount.</sub>
 
 ## How it works
 
