@@ -12,7 +12,11 @@ void showMsg(BuildContext context, String msg, {bool error = false}) {
   m.hideCurrentSnackBar();
   m.showSnackBar(
     SnackBar(
-      content: Text(msg, style: const TextStyle(fontSize: 20)),
+      // White on the red/green bar in both light and dark mode.
+      content: Text(
+        msg,
+        style: const TextStyle(fontSize: 20, color: Colors.white),
+      ),
       backgroundColor: error ? kRed : kGreen,
       duration: Duration(seconds: error ? 5 : 3),
     ),

@@ -67,6 +67,25 @@ class _JobFormScreenState extends State<JobFormScreen> {
 
   bool get _busy => _busyText.isNotEmpty || _saving;
 
+  // Validation: field key -> message, shown in red under the field until it is fixed.
+  final _errors = <String, String>{};
+  final _keys = {
+    for (final k in ['phone', 'name', 'appliance', 'amount']) k: GlobalKey(),
+  };
+  final _scroll = ScrollController();
+  static final _mobile = RegExp(r'^[6-9]\d{9}$');
+
+  Map<String, String> _validate() => {
+    if (!_mobile.hasMatch(_phone.text.trim())) 'phone': S.errPhone,
+    if (_name.text.trim().isEmpty) 'name': S.errName,
+    if (_appliance == null) 'appliance': S.errAppliance,
+    if (!_intake && _num(_finalAmount) == null) 'amount': S.errAmount,
+  };
+
+  void _clearError(String key) {
+    if (_errors.containsKey(key)) setState(() => _errors.remove(key));
+  }
+
   @override
   void initState() {
     super.initState();
@@ -82,6 +101,7 @@ class _JobFormScreenState extends State<JobFormScreen> {
   void dispose() {
     _timer?.cancel();
     _tick?.cancel();
+    _scroll.dispose();
     _rec.dispose();
     for (final c in [
       _phone,
@@ -119,6 +139,7 @@ class _JobFormScreenState extends State<JobFormScreen> {
       if (c != null) {
         if (_name.text.isEmpty && (c.name ?? '').isNotEmpty) {
           _name.text = c.name!;
+          _clearError('name');
         }
         if (_village.text.isEmpty && (c.village ?? '').isNotEmpty) {
           _village.text = c.village!;
@@ -272,6 +293,8 @@ class _JobFormScreenState extends State<JobFormScreen> {
         if (_pickup == null && p.pickupDate != null) {
           _pickup = DateTime.tryParse(p.pickupDate!);
         }
+        // Fields the voice just filled no longer need their red message.
+        _errors.removeWhere((k, _) => !_validate().containsKey(k));
       });
     } catch (e) {
       if (mounted && op == _voiceOp) showError(context, e);
@@ -285,12 +308,39 @@ class _JobFormScreenState extends State<JobFormScreen> {
 
   Future<void> _save() async {
     final phone = _phone.text.trim();
-    if (_intake && phone.length != 10) {
-      showMsg(context, S.phoneNeeded, error: true);
-      return;
-    }
-    if (phone.isNotEmpty && phone.length != 10) {
-      showMsg(context, S.phoneNeeded, error: true);
+    final errors = _validate();
+    setState(() {
+      _errors
+        ..clear()
+        ..addAll(errors);
+    });
+    if (errors.isNotEmpty) {
+      showMsg(context, S.fixErrors, error: true);
+      // Scroll to the first field that needs fixing, in screen order. The list only
+      // builds rows that are on screen, so if that field is off screen, go to the top
+      // first (all checked fields but the amount are near the top), then to the field.
+      final key = _keys[_keys.keys.firstWhere(errors.containsKey)]!;
+      void reveal() {
+        final ctx = key.currentContext;
+        if (ctx != null) {
+          Scrollable.ensureVisible(
+            ctx,
+            duration: const Duration(milliseconds: 300),
+            alignment: 0.2,
+          );
+        }
+      }
+
+      if (key.currentContext != null) {
+        reveal();
+      } else {
+        await _scroll.animateTo(
+          0,
+          duration: const Duration(milliseconds: 300),
+          curve: Curves.easeOut,
+        );
+        WidgetsBinding.instance.addPostFrameCallback((_) => reveal());
+      }
       return;
     }
     String? nz(TextEditingController c) {
@@ -300,7 +350,7 @@ class _JobFormScreenState extends State<JobFormScreen> {
 
     final data = <String, dynamic>{
       'kind': widget.kind,
-      if (phone.isNotEmpty) 'phone': phone,
+      'phone': phone,
       'name': nz(_name),
       'village': nz(_village),
       'appliance': _appliance,
@@ -371,6 +421,7 @@ class _JobFormScreenState extends State<JobFormScreen> {
     setState(() => _pickup = DateTime(n.year, n.month, n.day + days));
   }
 
+  /// [check] names a validated field: its label gets a " *", and its error shows under it.
   Widget _field(
     TextEditingController c,
     String label,
@@ -378,8 +429,10 @@ class _JobFormScreenState extends State<JobFormScreen> {
     TextInputType? type,
     int lines = 1,
     List<TextInputFormatter>? fmt,
+    String? check,
   }) {
     return Padding(
+      key: check == null ? null : _keys[check],
       padding: const EdgeInsets.only(bottom: 12),
       child: TextField(
         controller: c,
@@ -387,8 +440,14 @@ class _JobFormScreenState extends State<JobFormScreen> {
         minLines: lines,
         maxLines: lines == 1 ? 1 : 5,
         inputFormatters: fmt,
+        onChanged: check == null ? null : (_) => _clearError(check),
         style: const TextStyle(fontSize: 22),
-        decoration: InputDecoration(labelText: label, prefixIcon: Icon(icon)),
+        decoration: InputDecoration(
+          labelText: check == null ? label : '$label *',
+          prefixIcon: Icon(icon),
+          errorText: check == null ? null : _errors[check],
+          errorStyle: const TextStyle(fontSize: 16),
+        ),
       ),
     );
   }
@@ -600,7 +659,10 @@ class _JobFormScreenState extends State<JobFormScreen> {
         for (final e in S.appliances.entries)
           ChoiceChip(
             selected: _appliance == e.key,
-            onSelected: (_) => setState(() => _appliance = e.key),
+            onSelected: (_) => setState(() {
+              _appliance = e.key;
+              _errors.remove('appliance');
+            }),
             // Selection is shown by colour alone; the icon stays instead of a tick.
             showCheckmark: false,
             avatar: Icon(
@@ -659,6 +721,7 @@ class _JobFormScreenState extends State<JobFormScreen> {
     return Scaffold(
       appBar: AppBar(title: Text(_intake ? S.intakeTitle : S.quickTitle)),
       body: ListView(
+        controller: _scroll,
         padding: const EdgeInsets.all(14),
         children: [
           _field(
@@ -667,6 +730,7 @@ class _JobFormScreenState extends State<JobFormScreen> {
             Icons.phone,
             type: TextInputType.number,
             fmt: [...digits, LengthLimitingTextInputFormatter(10)],
+            check: 'phone',
           ),
           _customerBanner(),
           const SizedBox(height: 8),
@@ -720,10 +784,24 @@ class _JobFormScreenState extends State<JobFormScreen> {
               ),
             ),
           const Divider(height: 24),
-          _field(_name, S.name, Icons.person),
+          _field(_name, S.name, Icons.person, check: 'name'),
           _field(_village, S.village, Icons.home_work),
-          sectionTitle(S.appliance, icon: Icons.build),
+          KeyedSubtree(
+            key: _keys['appliance'],
+            child: sectionTitle('${S.appliance} *', icon: Icons.build),
+          ),
           _applianceGrid(),
+          if (_errors['appliance'] != null)
+            Padding(
+              padding: const EdgeInsets.only(top: 6, left: 12),
+              child: Text(
+                _errors['appliance']!,
+                style: TextStyle(
+                  fontSize: 16,
+                  color: Theme.of(context).colorScheme.error,
+                ),
+              ),
+            ),
           const SizedBox(height: 16),
           _field(_complaint, S.complaint, Icons.report_problem, lines: 2),
           _field(_diagnosis, S.diagnosis, Icons.troubleshoot, lines: 2),
@@ -770,6 +848,7 @@ class _JobFormScreenState extends State<JobFormScreen> {
               Icons.currency_rupee,
               type: TextInputType.number,
               fmt: digits,
+              check: 'amount',
             ),
             sectionTitle(S.paidQ, icon: Icons.payments),
             _payChoice(),

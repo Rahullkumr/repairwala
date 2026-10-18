@@ -69,10 +69,6 @@ class S {
   static String get quickTitle => _t('तुरंत ठीक किया', 'Fixed on the spot');
   static String get phone =>
       _t('फ़ोन नंबर (10 अंक)', 'Phone number (10 digits)');
-  static String get phoneNeeded => _t(
-    'फ़ोन नंबर ज़रूरी है (10 अंक)',
-    'Phone number is required (10 digits)',
-  );
   static String get oldCustomer => _t('पुराने ग्राहक', 'Returning customer');
   static String get pastJobs => _t('पिछले काम', 'Past jobs');
   static String get machinePhoto => _t('मशीन की फ़ोटो', 'Machine photo');
@@ -157,6 +153,15 @@ class S {
   static String get themeLight => _t('हल्का', 'Light');
   static String get themeDark => _t('गहरा', 'Dark');
   static String get switchTheme => _t('हल्का/गहरा रंग', 'Light/dark');
+  static String get errPhone => _t(
+    'सही मोबाइल नंबर भरें (10 अंक)',
+    'Enter a valid 10-digit mobile number',
+  );
+  static String get errName => _t('नाम भरें', 'Enter the name');
+  static String get errAppliance => _t('मशीन चुनें', 'Choose the machine');
+  static String get errAmount => _t('कुल रकम भरें', 'Enter the total amount');
+  static String get fixErrors =>
+      _t('लाल वाले खाने भरें', 'Please fill in the fields marked in red');
   static String get cancelWait => _t('रोकें', 'Cancel');
   static String secs(int n) => isHindi ? '$n सेकंड' : '${n}s';
   static String get retry => _t('फिर कोशिश करें', 'Try again');
