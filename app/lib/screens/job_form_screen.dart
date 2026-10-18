@@ -301,7 +301,7 @@ class _JobFormScreenState extends State<JobFormScreen> {
         Navigator.of(context).pop();
         m.showSnackBar(
           SnackBar(
-            content: const Text(S.quickSaved, style: TextStyle(fontSize: 20)),
+            content: Text(S.quickSaved, style: TextStyle(fontSize: 20)),
             backgroundColor: kGreen,
           ),
         );
@@ -688,12 +688,12 @@ class _JobFormScreenState extends State<JobFormScreen> {
             child: ExpansionTile(
               leading: const Icon(Icons.info_outline, size: 28),
               initiallyExpanded: false,
-              title: const Text(
+              title: Text(
                 S.machineInfo,
                 style: TextStyle(fontSize: 22, fontWeight: FontWeight.bold),
               ),
               subtitle: _readingPlate
-                  ? const Row(
+                  ? Row(
                       children: [
                         SizedBox(
                           width: 18,
@@ -789,7 +789,7 @@ class _JobNumberScreen extends StatelessWidget {
                 ),
               ),
               const SizedBox(height: 16),
-              const Text(
+              Text(
                 S.writeNumber,
                 textAlign: TextAlign.center,
                 style: TextStyle(
@@ -810,7 +810,7 @@ class _JobNumberScreen extends StatelessWidget {
                   ),
                 ),
                 onPressed: () => Navigator.of(context).pop(),
-                child: const Text(S.ok),
+                child: Text(S.ok),
               ),
             ],
           ),

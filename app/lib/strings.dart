@@ -1,104 +1,161 @@
 import 'package:flutter/material.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 /// All user-facing wording lives here so it is easy to change.
+/// Every string has a Hindi and an English version; Hindi is the default.
 class S {
-  static const appName = 'रिपेयरवाला';
-  static const settings = 'सेटिंग';
-  static const serverAddress = 'सर्वर का पता (जैसे http://192.168.1.5:3000)';
-  static const shopToken = 'दुकान का टोकन';
-  static const check = 'जाँचें';
-  static const save = 'सेव करें';
-  static const saved = 'सेव हो गया';
-  static const server = 'सर्वर';
-  static const whisper = 'आवाज़ पहचान';
-  static const ollama = 'समझने वाला (Gemma)';
-  static const tts = 'आवाज़ संदेश';
-  static const upi = 'UPI';
-  static const search = 'फ़ोन, नाम या गाँव खोजें';
-  static const tabOpen = 'चालू काम';
-  static const tabDone = 'पूरे हुए';
-  static const newIntake = 'मशीन जमा करें';
-  static const quickJob = 'तुरंत ठीक किया';
-  static const noJobs = 'कोई काम नहीं है';
-  static const overdue = 'देर हो गई';
-  static const today = 'आज';
-  static const tomorrow = 'कल';
-  static const dayAfter = 'परसों';
-  static const statusReceived = 'जमा';
-  static const statusRepaired = 'ठीक हो गया';
-  static const statusDelivered = 'दे दिया';
-  static const statusReturned = 'वापस';
-  static const connectError = 'सर्वर से जुड़ नहीं पाए — लैपटॉप चालू है?';
-  static const timeoutError = 'बहुत देर लग गई — फिर कोशिश करें';
-  static const needSettings = 'पहले सेटिंग में सर्वर का पता भरें';
-  static const intakeTitle = 'मशीन जमा करें';
-  static const quickTitle = 'तुरंत ठीक किया';
-  static const phone = 'फ़ोन नंबर (10 अंक)';
-  static const phoneNeeded = 'फ़ोन नंबर ज़रूरी है (10 अंक)';
-  static const oldCustomer = 'पुराने ग्राहक';
-  static const pastJobs = 'पिछले काम';
-  static const machinePhoto = 'मशीन की फ़ोटो';
-  static const platePhoto = 'प्लेट/लेबल की फ़ोटो';
-  static const customerPhoto = 'ग्राहक की फ़ोटो';
-  static const customerPhotoNote = 'ग्राहक से पूछ कर फ़ोटो लें';
-  static const readingPlate = 'प्लेट पढ़ रहे हैं…';
-  static const speak = 'बोलिए 🎤';
-  static const stopSpeak = 'रोकिए ⏹';
-  static const listening = 'सुन रहे हैं…';
-  static const understanding = 'समझ रहे हैं…';
-  static const hintIntake =
-      'नाम, गाँव, क्या ख़राबी है, कितना लगेगा, कब ले जाना है — बोलिए';
-  static const hintQuick = 'क्या ठीक किया और कितने पैसे — बोलिए';
-  static const transcript = 'आपने बोला (सुधार सकते हैं)';
-  static const micDenied = 'माइक की इजाज़त चाहिए';
-  static const name = 'नाम';
-  static const village = 'गाँव';
-  static const appliance = 'कौन सी मशीन';
-  static const complaint = 'शिकायत';
-  static const diagnosis = 'ख़राबी';
-  static const estimate = 'अनुमानित ख़र्च ₹';
-  static const pickupDate = 'ले जाने की तारीख़';
-  static const pickDate = 'तारीख़ चुनें';
-  static const workDone = 'क्या किया';
-  static const finalAmount = 'कुल ₹';
-  static const paidQ = 'पैसे मिले?';
-  static const cash = 'नकद';
-  static const upiPay = 'UPI';
-  static const notYet = 'अभी नहीं';
-  static const machineInfo = 'मशीन की जानकारी';
-  static const brand = 'कंपनी';
-  static const model = 'मॉडल';
-  static const rating = 'रेटिंग (HP/वॉट)';
-  static const serial = 'सीरियल नंबर';
-  static const saveJob = 'सेव करें';
-  static const saving = 'सेव हो रहा है…';
-  static const writeNumber = 'यह नंबर मशीन पर लिख दें';
-  static const ok = 'ठीक है';
-  static const quickSaved = 'काम सेव हो गया';
-  static const jobDetail = 'काम का ब्योरा';
-  static const call = '📞 कॉल करें';
-  static const fixed = 'ठीक हो गया ✅';
-  static const resend = 'फिर से भेजें';
-  static const handedOver = 'ग्राहक ले गया 🤝';
-  static const cannotFix = 'नहीं बनेगा, वापस किया';
-  static const confirmReturn = 'क्या यह मशीन बिना ठीक किए वापस की?';
-  static const yes = 'हाँ';
-  static const no = 'नहीं';
-  static const cancel = 'रद्द करें';
-  static const history = 'इनके दूसरे काम';
-  static const edit = 'बदलें';
-  static const messagePreview = 'ग्राहक को संदेश';
-  static const sendWhatsapp = 'WhatsApp पर भेजें';
-  static const sendMessageOnly = 'सिर्फ़ मैसेज भेजें';
-  static const playVoice = 'आवाज़ सुनें';
-  static const stopVoice = 'रोकें';
-  static const preparing = 'तैयार कर रहे हैं…';
-  static const loading = 'लोड हो रहा है…';
-  static const retry = 'फिर कोशिश करें';
-  static const paid = 'पैसे मिल गए';
-  static const notPaid = 'पैसे बाकी';
+  /// 'hi' or 'en'. The app rebuilds when this changes.
+  static final lang = ValueNotifier<String>('hi');
 
-  static const appliances = <String, String>{
+  static bool get isHindi => lang.value == 'hi';
+  static String _t(String hi, String en) => isHindi ? hi : en;
+
+  static Future<void> loadLang() async {
+    final p = await SharedPreferences.getInstance();
+    lang.value = p.getString('lang') == 'en' ? 'en' : 'hi';
+  }
+
+  static Future<void> setLang(String code) async {
+    lang.value = code == 'en' ? 'en' : 'hi';
+    final p = await SharedPreferences.getInstance();
+    await p.setString('lang', lang.value);
+  }
+
+  static Future<void> toggleLang() => setLang(isHindi ? 'en' : 'hi');
+
+  static String get language => _t('भाषा', 'Language');
+  static String get switchLang => _t('English', 'हिन्दी');
+  static String get appName => _t('रिपेयरवाला', 'Repairwala');
+  static String get settings => _t('सेटिंग', 'Settings');
+  static String get serverAddress => _t(
+    'सर्वर का पता (जैसे http://192.168.1.5:3000)',
+    'Server address (e.g. http://192.168.1.5:3000)',
+  );
+  static String get shopToken => _t('दुकान का टोकन', 'Shop token');
+  static String get check => _t('जाँचें', 'Check');
+  static String get save => _t('सेव करें', 'Save');
+  static String get saved => _t('सेव हो गया', 'Saved');
+  static String get server => _t('सर्वर', 'Server');
+  static String get whisper => _t('आवाज़ पहचान', 'Speech recognition');
+  static String get ollama => _t('समझने वाला (Gemma)', 'Understanding (Gemma)');
+  static String get tts => _t('आवाज़ संदेश', 'Voice message');
+  static String get upi => 'UPI';
+  static String get search =>
+      _t('फ़ोन, नाम या गाँव खोजें', 'Search phone, name or village');
+  static String get tabOpen => _t('चालू काम', 'Open jobs');
+  static String get tabDone => _t('पूरे हुए', 'Done');
+  static String get newIntake => _t('मशीन जमा करें', 'New job');
+  static String get quickJob => _t('तुरंत ठीक किया', 'Quick fix');
+  static String get noJobs => _t('कोई काम नहीं है', 'No jobs');
+  static String get overdue => _t('देर हो गई', 'Overdue');
+  static String get today => _t('आज', 'Today');
+  static String get tomorrow => _t('कल', 'Tomorrow');
+  static String get dayAfter => _t('परसों', 'Day after');
+  static String get statusReceived => _t('जमा', 'Received');
+  static String get statusRepaired => _t('ठीक हो गया', 'Repaired');
+  static String get statusDelivered => _t('दे दिया', 'Delivered');
+  static String get statusReturned => _t('वापस', 'Returned');
+  static String get connectError => _t(
+    'सर्वर से जुड़ नहीं पाए — लैपटॉप चालू है?',
+    "Can't reach the server — is the laptop on?",
+  );
+  static String get timeoutError =>
+      _t('बहुत देर लग गई — फिर कोशिश करें', 'That took too long — try again');
+  static String get needSettings => _t(
+    'पहले सेटिंग में सर्वर का पता भरें',
+    'First enter the server address in Settings',
+  );
+  static String get intakeTitle => _t('मशीन जमा करें', 'Take in machine');
+  static String get quickTitle => _t('तुरंत ठीक किया', 'Fixed on the spot');
+  static String get phone =>
+      _t('फ़ोन नंबर (10 अंक)', 'Phone number (10 digits)');
+  static String get phoneNeeded => _t(
+    'फ़ोन नंबर ज़रूरी है (10 अंक)',
+    'Phone number is required (10 digits)',
+  );
+  static String get oldCustomer => _t('पुराने ग्राहक', 'Returning customer');
+  static String get pastJobs => _t('पिछले काम', 'Past jobs');
+  static String get machinePhoto => _t('मशीन की फ़ोटो', 'Machine photo');
+  static String get platePhoto =>
+      _t('प्लेट/लेबल की फ़ोटो', 'Rating plate / label photo');
+  static String get customerPhoto => _t('ग्राहक की फ़ोटो', 'Customer photo');
+  static String get customerPhotoNote => _t(
+    'ग्राहक से पूछ कर फ़ोटो लें',
+    'Ask the customer before taking a photo',
+  );
+  static String get readingPlate =>
+      _t('प्लेट पढ़ रहे हैं…', 'Reading the plate…');
+  static String get speak => _t('बोलिए 🎤', 'Speak 🎤');
+  static String get stopSpeak => _t('रोकिए ⏹', 'Stop ⏹');
+  static String get listening => _t('सुन रहे हैं…', 'Listening…');
+  static String get understanding => _t('समझ रहे हैं…', 'Understanding…');
+  static String get hintIntake => _t(
+    'नाम, गाँव, क्या ख़राबी है, कितना लगेगा, कब ले जाना है — बोलिए',
+    'Say the name, village, the fault, the cost and when to pick it up (Hindi is fine)',
+  );
+  static String get hintQuick => _t(
+    'क्या ठीक किया और कितने पैसे — बोलिए',
+    'Say what you fixed and how much (Hindi is fine)',
+  );
+  static String get transcript =>
+      _t('आपने बोला (सुधार सकते हैं)', 'You said (you can correct it)');
+  static String get micDenied =>
+      _t('माइक की इजाज़त चाहिए', 'Microphone permission is needed');
+  static String get name => _t('नाम', 'Name');
+  static String get village => _t('गाँव', 'Village');
+  static String get appliance => _t('कौन सी मशीन', 'Which machine');
+  static String get complaint => _t('शिकायत', 'Complaint');
+  static String get diagnosis => _t('ख़राबी', 'Fault found');
+  static String get estimate => _t('अनुमानित ख़र्च ₹', 'Estimated cost ₹');
+  static String get pickupDate => _t('ले जाने की तारीख़', 'Pickup date');
+  static String get pickDate => _t('तारीख़ चुनें', 'Pick a date');
+  static String get workDone => _t('क्या किया', 'Work done');
+  static String get finalAmount => _t('कुल ₹', 'Total ₹');
+  static String get paidQ => _t('पैसे मिले?', 'Paid?');
+  static String get cash => _t('नकद', 'Cash');
+  static String get upiPay => 'UPI';
+  static String get notYet => _t('अभी नहीं', 'Not yet');
+  static String get machineInfo => _t('मशीन की जानकारी', 'Machine details');
+  static String get brand => _t('कंपनी', 'Brand');
+  static String get model => _t('मॉडल', 'Model');
+  static String get rating => _t('रेटिंग (HP/वॉट)', 'Rating (HP/W)');
+  static String get serial => _t('सीरियल नंबर', 'Serial number');
+  static String get saveJob => _t('सेव करें', 'Save');
+  static String get saving => _t('सेव हो रहा है…', 'Saving…');
+  static String get writeNumber =>
+      _t('यह नंबर मशीन पर लिख दें', 'Write this number on the machine');
+  static String get ok => _t('ठीक है', 'OK');
+  static String get quickSaved => _t('काम सेव हो गया', 'Job saved');
+  static String get jobDetail => _t('काम का ब्योरा', 'Job details');
+  static String get call => _t('📞 कॉल करें', '📞 Call');
+  static String get fixed => _t('ठीक हो गया ✅', 'Repaired ✅');
+  static String get resend => _t('फिर से भेजें', 'Send again');
+  static String get handedOver => _t('ग्राहक ले गया 🤝', 'Customer took it 🤝');
+  static String get cannotFix =>
+      _t('नहीं बनेगा, वापस किया', "Can't fix, returned");
+  static String get confirmReturn => _t(
+    'क्या यह मशीन बिना ठीक किए वापस की?',
+    'Was this machine returned without repair?',
+  );
+  static String get yes => _t('हाँ', 'Yes');
+  static String get no => _t('नहीं', 'No');
+  static String get cancel => _t('रद्द करें', 'Cancel');
+  static String get history => _t('इनके दूसरे काम', 'Their other jobs');
+  static String get edit => _t('बदलें', 'Edit');
+  static String get messagePreview =>
+      _t('ग्राहक को संदेश', 'Message to customer');
+  static String get sendWhatsapp => _t('WhatsApp पर भेजें', 'Send on WhatsApp');
+  static String get sendMessageOnly =>
+      _t('सिर्फ़ मैसेज भेजें', 'Send text only');
+  static String get playVoice => _t('आवाज़ सुनें', 'Play voice note');
+  static String get stopVoice => _t('रोकें', 'Stop');
+  static String get preparing => _t('तैयार कर रहे हैं…', 'Preparing…');
+  static String get loading => _t('लोड हो रहा है…', 'Loading…');
+  static String get retry => _t('फिर कोशिश करें', 'Try again');
+  static String get paid => _t('पैसे मिल गए', 'Paid');
+  static String get notPaid => _t('पैसे बाकी', 'Payment due');
+
+  static const _appliancesHi = <String, String>{
     'water_pump': 'पानी पंप',
     'submersible': 'सबमर्सिबल',
     'fan': 'पंखा',
@@ -112,6 +169,24 @@ class S {
     'iron': 'प्रेस (आयरन)',
     'other': 'अन्य',
   };
+
+  static const _appliancesEn = <String, String>{
+    'water_pump': 'Water pump',
+    'submersible': 'Submersible',
+    'fan': 'Fan',
+    'ac': 'AC',
+    'cooler': 'Cooler',
+    'cutter': 'Cutter',
+    'mixer': 'Mixer grinder',
+    'induction': 'Induction cooktop',
+    'heater': 'Heater',
+    'kettle': 'Kettle',
+    'iron': 'Iron',
+    'other': 'Other',
+  };
+
+  static Map<String, String> get appliances =>
+      isHindi ? _appliancesHi : _appliancesEn;
 
   static const applianceIcons = <String, IconData>{
     'water_pump': Icons.water_drop,

@@ -95,7 +95,7 @@ class _NotifyScreenState extends State<NotifyScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: const Text(S.messagePreview)),
+      appBar: AppBar(title: Text(S.messagePreview)),
       body: ListView(
         padding: const EdgeInsets.all(16),
         children: [
@@ -111,7 +111,7 @@ class _NotifyScreenState extends State<NotifyScreen> {
           if (_preparing)
             Row(
               mainAxisAlignment: MainAxisAlignment.center,
-              children: const [
+              children: [
                 SizedBox(
                   width: 28,
                   height: 28,
@@ -153,7 +153,7 @@ class _NotifyScreenState extends State<NotifyScreen> {
                 ),
               ),
               icon: const Icon(Icons.send, size: 36),
-              label: const Text(S.sendWhatsapp),
+              label: Text(S.sendWhatsapp),
               onPressed: _preparing ? null : _send,
             ),
           ),

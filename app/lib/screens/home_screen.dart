@@ -73,8 +73,15 @@ class _HomeScreenState extends State<HomeScreen>
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text(S.appName),
+        title: Text(S.appName),
         actions: [
+          // One tap switches the whole app between Hindi and English.
+          TextButton.icon(
+            style: TextButton.styleFrom(foregroundColor: Colors.white),
+            icon: const Icon(Icons.translate, size: 26),
+            label: Text(S.switchLang, style: const TextStyle(fontSize: 18)),
+            onPressed: S.toggleLang,
+          ),
           IconButton(
             iconSize: 32,
             icon: const Icon(Icons.settings),
@@ -92,7 +99,7 @@ class _HomeScreenState extends State<HomeScreen>
             fontSize: 22,
             fontWeight: FontWeight.bold,
           ),
-          tabs: const [
+          tabs: [
             Tab(icon: Icon(Icons.build), text: S.tabOpen, height: 64),
             Tab(icon: Icon(Icons.done_all), text: S.tabDone, height: 64),
           ],
@@ -188,7 +195,7 @@ class _HomeScreenState extends State<HomeScreen>
     }
     if (_jobs.isEmpty) {
       return ListView(
-        children: const [
+        children: [
           SizedBox(height: 100),
           Icon(Icons.inbox, size: 64, color: Colors.black38),
           SizedBox(height: 8),

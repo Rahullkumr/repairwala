@@ -77,7 +77,7 @@ class _JobDetailScreenState extends State<JobDetailScreen> {
               keyboardType: TextInputType.number,
               inputFormatters: [FilteringTextInputFormatter.digitsOnly],
               style: const TextStyle(fontSize: 24),
-              decoration: const InputDecoration(
+              decoration: InputDecoration(
                 labelText: S.finalAmount,
                 prefixIcon: Icon(Icons.currency_rupee),
               ),
@@ -86,7 +86,7 @@ class _JobDetailScreenState extends State<JobDetailScreen> {
             TextField(
               controller: work,
               style: const TextStyle(fontSize: 22),
-              decoration: const InputDecoration(
+              decoration: InputDecoration(
                 labelText: S.workDone,
                 prefixIcon: Icon(Icons.handyman),
               ),
@@ -127,7 +127,7 @@ class _JobDetailScreenState extends State<JobDetailScreen> {
     final choice = await showDialog<String>(
       context: context,
       builder: (ctx) => AlertDialog(
-        title: const Text(S.paidQ, style: TextStyle(fontSize: 26)),
+        title: Text(S.paidQ, style: TextStyle(fontSize: 26)),
         content: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
@@ -169,15 +169,15 @@ class _JobDetailScreenState extends State<JobDetailScreen> {
     final ok = await showDialog<bool>(
       context: context,
       builder: (ctx) => AlertDialog(
-        title: const Text(S.confirmReturn, style: TextStyle(fontSize: 24)),
+        title: Text(S.confirmReturn, style: TextStyle(fontSize: 24)),
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(ctx, false),
-            child: const Text(S.no, style: TextStyle(fontSize: 22)),
+            child: Text(S.no, style: TextStyle(fontSize: 22)),
           ),
           FilledButton(
             onPressed: () => Navigator.pop(ctx, true),
-            child: const Text(S.yes, style: TextStyle(fontSize: 22)),
+            child: Text(S.yes, style: TextStyle(fontSize: 22)),
           ),
         ],
       ),
@@ -214,7 +214,7 @@ class _JobDetailScreenState extends State<JobDetailScreen> {
                 keyboardType: TextInputType.number,
                 inputFormatters: [FilteringTextInputFormatter.digitsOnly],
                 style: const TextStyle(fontSize: 24),
-                decoration: const InputDecoration(
+                decoration: InputDecoration(
                   labelText: S.estimate,
                   prefixIcon: Icon(Icons.currency_rupee),
                 ),
@@ -223,7 +223,7 @@ class _JobDetailScreenState extends State<JobDetailScreen> {
               TextField(
                 controller: diag,
                 style: const TextStyle(fontSize: 22),
-                decoration: const InputDecoration(
+                decoration: InputDecoration(
                   labelText: S.diagnosis,
                   prefixIcon: Icon(Icons.troubleshoot),
                 ),
@@ -526,7 +526,7 @@ class _JobDetailScreenState extends State<JobDetailScreen> {
         TextButton.icon(
           onPressed: _returned,
           icon: const Icon(Icons.undo),
-          label: const Text(S.cannotFix, style: TextStyle(fontSize: 18)),
+          label: Text(S.cannotFix, style: TextStyle(fontSize: 18)),
         ),
       );
     }

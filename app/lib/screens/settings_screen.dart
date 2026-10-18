@@ -75,15 +75,34 @@ class _SettingsScreenState extends State<SettingsScreen> {
   Widget build(BuildContext context) {
     final h = _health;
     return Scaffold(
-      appBar: AppBar(title: const Text(S.settings)),
+      appBar: AppBar(title: Text(S.settings)),
       body: ListView(
         padding: const EdgeInsets.all(16),
         children: [
+          // Language first, so a new user can pick it before reading anything else.
+          Text(S.language, style: const TextStyle(fontSize: 20)),
+          const SizedBox(height: 8),
+          SegmentedButton<String>(
+            segments: const [
+              ButtonSegment(
+                value: 'hi',
+                label: Text('हिन्दी', style: TextStyle(fontSize: 20)),
+              ),
+              ButtonSegment(
+                value: 'en',
+                label: Text('English', style: TextStyle(fontSize: 20)),
+              ),
+            ],
+            selected: {S.lang.value},
+            showSelectedIcon: true,
+            onSelectionChanged: (s) => S.setLang(s.first),
+          ),
+          const SizedBox(height: 20),
           TextField(
             controller: _url,
             keyboardType: TextInputType.url,
             style: const TextStyle(fontSize: 22),
-            decoration: const InputDecoration(
+            decoration: InputDecoration(
               labelText: S.serverAddress,
               prefixIcon: Icon(Icons.wifi),
             ),
@@ -92,7 +111,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
           TextField(
             controller: _token,
             style: const TextStyle(fontSize: 22),
-            decoration: const InputDecoration(
+            decoration: InputDecoration(
               labelText: S.shopToken,
               prefixIcon: Icon(Icons.key),
             ),
