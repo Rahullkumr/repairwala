@@ -1,0 +1,23 @@
+{
+  "name": "theek-ho-gaya-server",
+  "version": "1.0.0",
+  "description": "Local server for Theek Ho Gaya, a job-card app for a village electrician's repair shop: SQLite storage, Whisper, Gemma and ElevenLabs.",
+  "main": "src/server.js",
+  "scripts": {
+    "start": "node --experimental-sqlite --env-file-if-exists=.env src/server.js",
+    "try-parse": "node --experimental-sqlite --env-file-if-exists=.env scripts/try-parse.js",
+    "check-numbers": "node scripts/check-numbers.js"
+  },
+  "author": "Rahul Kumar",
+  "license": "MIT",
+  "type": "module",
+  "dependencies": {
+    "@fastify/multipart": "^10.1.4",
+    "fastify": "^5.12.7",
+    "qrcode": "^1.5.4"
+  },
+  "private": true,
+  "engines": {
+    "node": ">=22.12"
+  }
+}
