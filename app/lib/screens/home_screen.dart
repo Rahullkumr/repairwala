@@ -76,10 +76,10 @@ class _HomeScreenState extends State<HomeScreen>
         title: Text(S.appName),
         actions: [
           // One tap switches the whole app between Hindi and English.
-          TextButton.icon(
-            style: TextButton.styleFrom(foregroundColor: Colors.white),
-            icon: const Icon(Icons.translate, size: 26),
-            label: Text(S.switchLang, style: const TextStyle(fontSize: 18)),
+          IconButton(
+            iconSize: 30,
+            icon: const Icon(Icons.translate),
+            tooltip: S.switchLang,
             onPressed: S.toggleLang,
           ),
           IconButton(
