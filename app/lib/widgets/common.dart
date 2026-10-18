@@ -59,7 +59,10 @@ class BigButton extends StatelessWidget {
             borderRadius: BorderRadius.circular(16),
           ),
           backgroundColor: outlined ? null : color,
-          foregroundColor: outlined ? color : null,
+          // A coloured button always gets white text, in light and dark mode.
+          foregroundColor: outlined
+              ? color
+              : (color != null ? Colors.white : null),
         );
     final child = Row(
       mainAxisAlignment: MainAxisAlignment.center,

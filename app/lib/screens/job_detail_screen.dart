@@ -288,7 +288,7 @@ class _JobDetailScreenState extends State<JobDetailScreen> {
     final j = _job;
     return Scaffold(
       appBar: AppBar(
-        title: Text(j == null ? S.jobDetail : '#${j.id}'),
+        title: Text(S.jobDetail),
         actions: [
           if (j != null) ...[
             IconButton(
@@ -379,7 +379,7 @@ class _JobDetailScreenState extends State<JobDetailScreen> {
               ],
             ),
           ),
-        sectionTitle(S.name, icon: Icons.person),
+        sectionTitle(S.customer, icon: Icons.contacts),
         _kv(Icons.person, S.name, c?.name),
         _kv(Icons.home_work, S.village, c?.village),
         _kv(Icons.phone, S.phone.split(' ').first, c?.phone),
@@ -399,12 +399,12 @@ class _JobDetailScreenState extends State<JobDetailScreen> {
         _kv(Icons.handyman, S.workDone, j.workDone),
         _kv(
           Icons.currency_rupee,
-          S.estimate,
+          S.estimateLabel,
           j.estimate == null ? null : '₹${j.estimate}',
         ),
         _kv(
           Icons.currency_rupee,
-          S.finalAmount,
+          S.totalLabel,
           j.finalAmount == null ? null : '₹${j.finalAmount}',
         ),
         _kv(
@@ -419,7 +419,7 @@ class _JobDetailScreenState extends State<JobDetailScreen> {
         if (j.status == 'delivered')
           _kv(
             Icons.payments,
-            S.paidQ,
+            S.payment,
             j.paid
                 ? '${S.paid} (${j.payMethod == 'upi' ? S.upiPay : S.cash})'
                 : S.notPaid,

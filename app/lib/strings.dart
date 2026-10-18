@@ -81,8 +81,8 @@ class S {
   );
   static String get readingPlate =>
       _t('प्लेट पढ़ रहे हैं…', 'Reading the plate…');
-  static String get speak => _t('बोलिए 🎤', 'Speak 🎤');
-  static String get stopSpeak => _t('रोकिए ⏹', 'Stop ⏹');
+  static String get speak => _t('बोलिए', 'Speak');
+  static String get stopSpeak => _t('रोकिए', 'Stop');
   static String get listening => _t('सुन रहे हैं…', 'Listening…');
   static String get understanding => _t('समझ रहे हैं…', 'Understanding…');
   static String get hintIntake => _t(
@@ -98,6 +98,7 @@ class S {
   static String get micDenied =>
       _t('माइक की इजाज़त चाहिए', 'Microphone permission is needed');
   static String get name => _t('नाम', 'Name');
+  static String get customer => _t('ग्राहक', 'Customer');
   static String get village => _t('गाँव', 'Village');
   static String get appliance => _t('कौन सी मशीन', 'Which machine');
   static String get complaint => _t('शिकायत', 'Complaint');
@@ -106,6 +107,10 @@ class S {
   static String get pickupDate => _t('ले जाने की तारीख़', 'Pickup date');
   static String get pickDate => _t('तारीख़ चुनें', 'Pick a date');
   static String get workDone => _t('क्या किया', 'Work done');
+  // Labels for amounts shown next to a ₹ icon and a ₹ value, so without their own ₹.
+  static String get estimateLabel => _t('अनुमानित ख़र्च', 'Estimated cost');
+  static String get totalLabel => _t('कुल', 'Total');
+  static String get payment => _t('भुगतान', 'Payment');
   static String get finalAmount => _t('कुल ₹', 'Total ₹');
   static String get paidQ => _t('पैसे मिले?', 'Paid?');
   static String get cash => _t('नकद', 'Cash');
@@ -123,10 +128,10 @@ class S {
   static String get ok => _t('ठीक है', 'OK');
   static String get quickSaved => _t('काम सेव हो गया', 'Job saved');
   static String get jobDetail => _t('काम का ब्योरा', 'Job details');
-  static String get call => _t('📞 कॉल करें', '📞 Call');
-  static String get fixed => _t('ठीक हो गया ✅', 'Repaired ✅');
+  static String get call => _t('कॉल करें', 'Call');
+  static String get fixed => _t('ठीक हो गया', 'Repaired');
   static String get resend => _t('फिर से भेजें', 'Send again');
-  static String get handedOver => _t('ग्राहक ले गया 🤝', 'Customer took it 🤝');
+  static String get handedOver => _t('ग्राहक ले गया', 'Customer took it');
   static String get cannotFix =>
       _t('नहीं बनेगा, वापस किया', "Can't fix, returned");
   static String get confirmReturn => _t(
