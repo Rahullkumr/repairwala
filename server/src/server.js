@@ -1,4 +1,4 @@
-// Local server for Theek Ho Gaya: job cards in SQLite, Whisper for speech, Gemma for
+// Local server for Repairwala: job cards in SQLite, Whisper for speech, Gemma for
 // reading the speech, ElevenLabs for the "ready" voice note. Runs on the shop laptop.
 import { networkInterfaces } from 'node:os';
 import { timingSafeEqual } from 'node:crypto';

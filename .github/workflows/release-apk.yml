@@ -55,14 +55,14 @@ jobs:
       - run: flutter build apk --release --build-number=${{ github.run_number }}
 
       - name: Rename APK
-        run: mv build/app/outputs/flutter-apk/app-release.apk build/app/outputs/flutter-apk/theek-ho-gaya-v1.0.${{ github.run_number }}.apk
+        run: mv build/app/outputs/flutter-apk/app-release.apk build/app/outputs/flutter-apk/repairwala-v1.0.${{ github.run_number }}.apk
 
       - name: Push to Releases
         uses: ncipollo/release-action@v1
         with:
-          artifacts: "app/build/app/outputs/flutter-apk/theek-ho-gaya-*.apk"
+          artifacts: "app/build/app/outputs/flutter-apk/repairwala-*.apk"
           tag: v1.0.${{ github.run_number }}
-          name: Theek Ho Gaya v1.0.${{ github.run_number }}
+          name: Repairwala v1.0.${{ github.run_number }}
           body: "Android app for the shop phone. Install the APK, then set the laptop server address and shop token in सेटिंग."
           token: ${{ secrets.GITHUB_TOKEN }}
           allowUpdates: true

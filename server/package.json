@@ -1,7 +1,7 @@
 {
-  "name": "theek-ho-gaya-server",
+  "name": "repairwala-server",
   "version": "1.0.0",
-  "description": "Local server for Theek Ho Gaya, a job-card app for a village electrician's repair shop: SQLite storage, Whisper, Gemma and ElevenLabs.",
+  "description": "Local server for Repairwala, a job-card app for a village electrician's repair shop: SQLite storage, Whisper, Gemma and ElevenLabs.",
   "main": "src/server.js",
   "scripts": {
     "start": "node --experimental-sqlite --env-file-if-exists=.env src/server.js",

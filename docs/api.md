@@ -1,4 +1,4 @@
-# Theek Ho Gaya: API contract
+# Repairwala: API contract
 
 The Flutter app (`app/`) on the shop owner's phone talks to the server (`server/`) on the shop laptop over the shop Wi-Fi.
 The server listens on `0.0.0.0:3000` by default. Every `/api/*` request must send the header `X-Shop-Token: <SHOP_TOKEN from server .env>`; a wrong or missing token gets `401 {"error":"bad token"}`.

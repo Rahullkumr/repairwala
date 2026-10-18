@@ -2,7 +2,7 @@ import 'package:flutter/services.dart';
 import 'package:share_plus/share_plus.dart';
 import 'package:url_launcher/url_launcher.dart';
 
-const _channel = MethodChannel('theek/whatsapp');
+const _channel = MethodChannel('repairwala/whatsapp');
 
 /// Try to send straight into the customer's WhatsApp chat; fall back to the
 /// system share sheet if WhatsApp (or the channel) is not available.

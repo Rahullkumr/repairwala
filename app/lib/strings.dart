@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 
 /// All user-facing wording lives here so it is easy to change.
 class S {
-  static const appName = 'ठीक हो गया';
+  static const appName = 'रिपेयरवाला';
   static const settings = 'सेटिंग';
   static const serverAddress = 'सर्वर का पता (जैसे http://192.168.1.5:3000)';
   static const shopToken = 'दुकान का टोकन';

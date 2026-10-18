@@ -9,11 +9,11 @@ import 'widgets/common.dart';
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
   await api.load();
-  runApp(const TheekHoGayaApp());
+  runApp(const RepairwalaApp());
 }
 
-class TheekHoGayaApp extends StatelessWidget {
-  const TheekHoGayaApp({super.key});
+class RepairwalaApp extends StatelessWidget {
+  const RepairwalaApp({super.key});
 
   @override
   Widget build(BuildContext context) {

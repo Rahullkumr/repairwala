@@ -1,4 +1,4 @@
-package com.theekhogaya.theek_ho_gaya
+package com.repairwala.app
 
 import android.content.ActivityNotFoundException
 import android.content.Intent
@@ -13,7 +13,7 @@ import java.io.File
 class MainActivity : FlutterActivity() {
     override fun configureFlutterEngine(flutterEngine: FlutterEngine) {
         super.configureFlutterEngine(flutterEngine)
-        MethodChannel(flutterEngine.dartExecutor.binaryMessenger, "theek/whatsapp")
+        MethodChannel(flutterEngine.dartExecutor.binaryMessenger, "repairwala/whatsapp")
             .setMethodCallHandler { call, result ->
                 if (call.method == "shareToChat") {
                     val phone = call.argument<String>("phone") ?: ""
