@@ -21,10 +21,9 @@ Future<void> shareToChat({
       if (ok == true) return;
     } catch (_) {}
   }
-  await SharePlus.instance.share(ShareParams(
-    text: text,
-    files: paths.map((p) => XFile(p)).toList(),
-  ));
+  await SharePlus.instance.share(
+    ShareParams(text: text, files: paths.map((p) => XFile(p)).toList()),
+  );
 }
 
 /// Open wa.me with only the text (no attachments).

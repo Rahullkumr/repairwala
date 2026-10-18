@@ -35,12 +35,12 @@ class Customer {
     this.photoUrl,
   });
   factory Customer.fromJson(Map<String, dynamic> j) => Customer(
-        id: _int(j['id']) ?? 0,
-        phone: (j['phone'] ?? '').toString(),
-        name: j['name'] as String?,
-        village: j['village'] as String?,
-        photoUrl: j['photo_url'] as String?,
-      );
+    id: _int(j['id']) ?? 0,
+    phone: (j['phone'] ?? '').toString(),
+    name: j['name'] as String?,
+    village: j['village'] as String?,
+    photoUrl: j['photo_url'] as String?,
+  );
 }
 
 class Job {
@@ -88,37 +88,37 @@ class Job {
   });
 
   factory Job.fromJson(Map<String, dynamic> j) => Job(
-        id: _int(j['id']) ?? 0,
-        customer: j['customer'] is Map<String, dynamic>
-            ? Customer.fromJson(j['customer'] as Map<String, dynamic>)
-            : null,
-        kind: (j['kind'] ?? 'intake').toString(),
-        appliance: j['appliance'] as String?,
-        brand: j['brand'] as String?,
-        model: j['model'] as String?,
-        rating: j['rating'] as String?,
-        serial: j['serial'] as String?,
-        complaint: j['complaint'] as String?,
-        diagnosis: j['diagnosis'] as String?,
-        workDone: j['work_done'] as String?,
-        estimate: _int(j['estimate']),
-        finalAmount: _int(j['final_amount']),
-        pickupDate: j['pickup_date'] as String?,
-        status: (j['status'] ?? 'received').toString(),
-        paid: j['paid'] == true || j['paid'] == 1,
-        payMethod: j['pay_method'] as String?,
-        transcript: j['transcript'] as String?,
-        machinePhotoUrl: j['machine_photo_url'] as String?,
-        platePhotoUrl: j['plate_photo_url'] as String?,
-        createdAt: j['created_at'] as String?,
-        repairedAt: j['repaired_at'] as String?,
-        deliveredAt: j['delivered_at'] as String?,
-        notifiedAt: j['notified_at'] as String?,
-        history: (j['history'] as List? ?? [])
-            .whereType<Map<String, dynamic>>()
-            .map(Job.fromJson)
-            .toList(),
-      );
+    id: _int(j['id']) ?? 0,
+    customer: j['customer'] is Map<String, dynamic>
+        ? Customer.fromJson(j['customer'] as Map<String, dynamic>)
+        : null,
+    kind: (j['kind'] ?? 'intake').toString(),
+    appliance: j['appliance'] as String?,
+    brand: j['brand'] as String?,
+    model: j['model'] as String?,
+    rating: j['rating'] as String?,
+    serial: j['serial'] as String?,
+    complaint: j['complaint'] as String?,
+    diagnosis: j['diagnosis'] as String?,
+    workDone: j['work_done'] as String?,
+    estimate: _int(j['estimate']),
+    finalAmount: _int(j['final_amount']),
+    pickupDate: j['pickup_date'] as String?,
+    status: (j['status'] ?? 'received').toString(),
+    paid: j['paid'] == true || j['paid'] == 1,
+    payMethod: j['pay_method'] as String?,
+    transcript: j['transcript'] as String?,
+    machinePhotoUrl: j['machine_photo_url'] as String?,
+    platePhotoUrl: j['plate_photo_url'] as String?,
+    createdAt: j['created_at'] as String?,
+    repairedAt: j['repaired_at'] as String?,
+    deliveredAt: j['delivered_at'] as String?,
+    notifiedAt: j['notified_at'] as String?,
+    history: (j['history'] as List? ?? [])
+        .whereType<Map<String, dynamic>>()
+        .map(Job.fromJson)
+        .toList(),
+  );
 
   bool get isOpen => status == 'received' || status == 'repaired';
 
@@ -139,16 +139,22 @@ class Job {
 class Health {
   final bool ok, whisper, ollama, tts, upiReady;
   final String? shopName;
-  Health(this.ok, this.whisper, this.ollama, this.tts, this.upiReady,
-      this.shopName);
+  Health(
+    this.ok,
+    this.whisper,
+    this.ollama,
+    this.tts,
+    this.upiReady,
+    this.shopName,
+  );
   factory Health.fromJson(Map<String, dynamic> j) => Health(
-        j['ok'] == true,
-        j['whisper'] == true,
-        j['ollama'] == true,
-        j['tts'] == true,
-        j['upi_ready'] == true,
-        j['shop_name'] as String?,
-      );
+    j['ok'] == true,
+    j['whisper'] == true,
+    j['ollama'] == true,
+    j['tts'] == true,
+    j['upi_ready'] == true,
+    j['shop_name'] as String?,
+  );
 }
 
 class ParsedIntake {
@@ -156,36 +162,36 @@ class ParsedIntake {
   final int? estimate, finalAmount;
   final String? pickupDate;
   ParsedIntake.fromJson(Map<String, dynamic> j)
-      : name = j['name'] as String?,
-        village = j['village'] as String?,
-        appliance = j['appliance'] as String?,
-        complaint = j['complaint'] as String?,
-        diagnosis = j['diagnosis'] as String?,
-        workDone = j['work_done'] as String?,
-        estimate = _int(j['estimate']),
-        finalAmount = _int(j['final_amount']),
-        pickupDate = j['pickup_date'] as String?;
+    : name = j['name'] as String?,
+      village = j['village'] as String?,
+      appliance = j['appliance'] as String?,
+      complaint = j['complaint'] as String?,
+      diagnosis = j['diagnosis'] as String?,
+      workDone = j['work_done'] as String?,
+      estimate = _int(j['estimate']),
+      finalAmount = _int(j['final_amount']),
+      pickupDate = j['pickup_date'] as String?;
 }
 
 class PlateInfo {
   final String? brand, model, rating, serial;
   PlateInfo.fromJson(Map<String, dynamic> j)
-      : brand = j['brand'] as String?,
-        model = j['model'] as String?,
-        rating = j['rating'] as String?,
-        serial = j['serial'] as String?;
+    : brand = j['brand'] as String?,
+      model = j['model'] as String?,
+      rating = j['rating'] as String?,
+      serial = j['serial'] as String?;
 }
 
 class NotifyResult {
   final String text;
   final String? speech, voiceUrl, qrUrl, upiLink, waPhone;
   NotifyResult.fromJson(Map<String, dynamic> j)
-      : text = (j['text'] ?? '').toString(),
-        speech = j['speech'] as String?,
-        voiceUrl = j['voice_url'] as String?,
-        qrUrl = j['qr_url'] as String?,
-        upiLink = j['upi_link'] as String?,
-        waPhone = j['wa_phone'] as String?;
+    : text = (j['text'] ?? '').toString(),
+      speech = j['speech'] as String?,
+      voiceUrl = j['voice_url'] as String?,
+      qrUrl = j['qr_url'] as String?,
+      upiLink = j['upi_link'] as String?,
+      waPhone = j['wa_phone'] as String?;
 }
 
 class CustomerLookup {
@@ -231,8 +237,10 @@ class Api {
     return q == null ? u : u.replace(queryParameters: q);
   }
 
-  Future<dynamic> _run(Future<http.Response> Function() f,
-      {Duration timeout = const Duration(seconds: 20)}) async {
+  Future<dynamic> _run(
+    Future<http.Response> Function() f, {
+    Duration timeout = const Duration(seconds: 20),
+  }) async {
     try {
       final r = await f().timeout(timeout);
       dynamic body;
@@ -277,8 +285,10 @@ class Api {
   }
 
   Future<Health> health() async {
-    final b = await _run(() => http.get(_uri('/api/health'), headers: headers),
-        timeout: const Duration(seconds: 8));
+    final b = await _run(
+      () => http.get(_uri('/api/health'), headers: headers),
+      timeout: const Duration(seconds: 8),
+    );
     return Health.fromJson(b as Map<String, dynamic>);
   }
 
@@ -289,9 +299,11 @@ class Api {
 
   Future<ParsedIntake> parseIntake(String text, String kind) async {
     final b = await _run(
-      () => http.post(_uri('/api/parse-intake'),
-          headers: {...headers, 'Content-Type': 'application/json'},
-          body: jsonEncode({'text': text, 'kind': kind})),
+      () => http.post(
+        _uri('/api/parse-intake'),
+        headers: {...headers, 'Content-Type': 'application/json'},
+        body: jsonEncode({'text': text, 'kind': kind}),
+      ),
       timeout: const Duration(seconds: 120),
     );
     return ParsedIntake.fromJson(b as Map<String, dynamic>);
@@ -304,9 +316,9 @@ class Api {
 
   Future<CustomerLookup> customerByPhone(String phone) async {
     final b = await _run(
-        () => http.get(_uri('/api/customers/by-phone/$phone'),
-            headers: headers),
-        timeout: const Duration(seconds: 10));
+      () => http.get(_uri('/api/customers/by-phone/$phone'), headers: headers),
+      timeout: const Duration(seconds: 10),
+    );
     final m = b as Map<String, dynamic>;
     return CustomerLookup(
       m['customer'] is Map<String, dynamic>
@@ -319,8 +331,12 @@ class Api {
     );
   }
 
-  Future<Job> createJob(Map<String, dynamic> data,
-      {String? machine, String? plate, String? customer}) async {
+  Future<Job> createJob(
+    Map<String, dynamic> data, {
+    String? machine,
+    String? plate,
+    String? customer,
+  }) async {
     final files = <String, String>{
       if (machine != null) 'machine_photo': machine,
       if (plate != null) 'plate_photo': plate,
@@ -332,11 +348,15 @@ class Api {
 
   Future<List<Job>> listJobs(String status, String q) async {
     final b = await _run(
-        () => http.get(
-            _uri('/api/jobs',
-                {'status': status, if (q.trim().isNotEmpty) 'q': q.trim()}),
-            headers: headers),
-        timeout: const Duration(seconds: 15));
+      () => http.get(
+        _uri('/api/jobs', {
+          'status': status,
+          if (q.trim().isNotEmpty) 'q': q.trim(),
+        }),
+        headers: headers,
+      ),
+      timeout: const Duration(seconds: 15),
+    );
     return ((b as Map)['jobs'] as List? ?? [])
         .whereType<Map<String, dynamic>>()
         .map(Job.fromJson)
@@ -344,28 +364,38 @@ class Api {
   }
 
   Future<Job> getJob(int id) async {
-    final b =
-        await _run(() => http.get(_uri('/api/jobs/$id'), headers: headers));
+    final b = await _run(
+      () => http.get(_uri('/api/jobs/$id'), headers: headers),
+    );
     return Job.fromJson(b as Map<String, dynamic>);
   }
 
   Future<Job> patchJob(int id, Map<String, dynamic> data) async {
-    final b = await _run(() => http.patch(_uri('/api/jobs/$id'),
+    final b = await _run(
+      () => http.patch(
+        _uri('/api/jobs/$id'),
         headers: {...headers, 'Content-Type': 'application/json'},
-        body: jsonEncode(data)));
+        body: jsonEncode(data),
+      ),
+    );
     return Job.fromJson(b as Map<String, dynamic>);
   }
 
-  Future<NotifyResult> notify(int id,
-      {int? finalAmount, String? workDone}) async {
+  Future<NotifyResult> notify(
+    int id, {
+    int? finalAmount,
+    String? workDone,
+  }) async {
     final b = await _run(
-      () => http.post(_uri('/api/jobs/$id/notify'),
-          headers: {...headers, 'Content-Type': 'application/json'},
-          body: jsonEncode({
-            if (finalAmount != null) 'final_amount': finalAmount,
-            if (workDone != null && workDone.trim().isNotEmpty)
-              'work_done': workDone.trim(),
-          })),
+      () => http.post(
+        _uri('/api/jobs/$id/notify'),
+        headers: {...headers, 'Content-Type': 'application/json'},
+        body: jsonEncode({
+          if (finalAmount != null) 'final_amount': finalAmount,
+          if (workDone != null && workDone.trim().isNotEmpty)
+            'work_done': workDone.trim(),
+        }),
+      ),
       timeout: const Duration(seconds: 120),
     );
     return NotifyResult.fromJson(b as Map<String, dynamic>);

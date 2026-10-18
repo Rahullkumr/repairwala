@@ -48,7 +48,9 @@ class _HomeScreenState extends State<HomeScreen>
     });
     try {
       final j = await api.listJobs(
-          _tabs.index == 0 ? 'open' : 'done', _search.text);
+        _tabs.index == 0 ? 'open' : 'done',
+        _search.text,
+      );
       if (mounted) setState(() => _jobs = j);
     } catch (e) {
       if (mounted) {
@@ -63,8 +65,7 @@ class _HomeScreenState extends State<HomeScreen>
   }
 
   Future<void> _open(Widget screen) async {
-    await Navigator.of(context)
-        .push(MaterialPageRoute(builder: (_) => screen));
+    await Navigator.of(context).push(MaterialPageRoute(builder: (_) => screen));
     if (mounted) _load();
   }
 
@@ -87,7 +88,10 @@ class _HomeScreenState extends State<HomeScreen>
           labelColor: Colors.white,
           unselectedLabelColor: Colors.white70,
           indicatorColor: Colors.white,
-          labelStyle: const TextStyle(fontSize: 22, fontWeight: FontWeight.bold),
+          labelStyle: const TextStyle(
+            fontSize: 22,
+            fontWeight: FontWeight.bold,
+          ),
           tabs: const [
             Tab(icon: Icon(Icons.build), text: S.tabOpen, height: 64),
             Tab(icon: Icon(Icons.done_all), text: S.tabDone, height: 64),
@@ -111,7 +115,8 @@ class _HomeScreenState extends State<HomeScreen>
                         onPressed: () {
                           _search.clear();
                           _load();
-                        }),
+                        },
+                      ),
               ),
               onChanged: (_) {
                 _debounce?.cancel();
@@ -120,33 +125,34 @@ class _HomeScreenState extends State<HomeScreen>
             ),
           ),
           Expanded(
-            child: RefreshIndicator(
-              onRefresh: _load,
-              child: _body(),
-            ),
+            child: RefreshIndicator(onRefresh: _load, child: _body()),
           ),
           SafeArea(
             top: false,
             child: Padding(
               padding: const EdgeInsets.fromLTRB(12, 6, 12, 10),
-              child: Row(children: [
-                Expanded(
-                  child: BigButton(
-                    icon: Icons.add_box,
-                    label: S.newIntake,
-                    onPressed: () => _open(const JobFormScreen(kind: 'intake')),
+              child: Row(
+                children: [
+                  Expanded(
+                    child: BigButton(
+                      icon: Icons.add_box,
+                      label: S.newIntake,
+                      onPressed: () =>
+                          _open(const JobFormScreen(kind: 'intake')),
+                    ),
                   ),
-                ),
-                const SizedBox(width: 10),
-                Expanded(
-                  child: BigButton(
-                    icon: Icons.bolt,
-                    label: S.quickJob,
-                    color: kOrange,
-                    onPressed: () => _open(const JobFormScreen(kind: 'quick')),
+                  const SizedBox(width: 10),
+                  Expanded(
+                    child: BigButton(
+                      icon: Icons.bolt,
+                      label: S.quickJob,
+                      color: kOrange,
+                      onPressed: () =>
+                          _open(const JobFormScreen(kind: 'quick')),
+                    ),
                   ),
-                ),
-              ]),
+                ],
+              ),
             ),
           ),
         ],
@@ -156,29 +162,39 @@ class _HomeScreenState extends State<HomeScreen>
 
   Widget _body() {
     if (_loading && _jobs.isEmpty) {
-      return ListView(children: const [
-        SizedBox(height: 120),
-        Center(child: CircularProgressIndicator()),
-      ]);
+      return ListView(
+        children: const [
+          SizedBox(height: 120),
+          Center(child: CircularProgressIndicator()),
+        ],
+      );
     }
     if (_error != null) {
-      return ListView(padding: const EdgeInsets.all(24), children: [
-        const SizedBox(height: 40),
-        const Icon(Icons.wifi_off, size: 64, color: kRed),
-        const SizedBox(height: 12),
-        Text(_error!,
-            textAlign: TextAlign.center, style: const TextStyle(fontSize: 22)),
-        const SizedBox(height: 16),
-        BigButton(icon: Icons.refresh, label: S.retry, onPressed: _load),
-      ]);
+      return ListView(
+        padding: const EdgeInsets.all(24),
+        children: [
+          const SizedBox(height: 40),
+          const Icon(Icons.wifi_off, size: 64, color: kRed),
+          const SizedBox(height: 12),
+          Text(
+            _error!,
+            textAlign: TextAlign.center,
+            style: const TextStyle(fontSize: 22),
+          ),
+          const SizedBox(height: 16),
+          BigButton(icon: Icons.refresh, label: S.retry, onPressed: _load),
+        ],
+      );
     }
     if (_jobs.isEmpty) {
-      return ListView(children: const [
-        SizedBox(height: 100),
-        Icon(Icons.inbox, size: 64, color: Colors.black38),
-        SizedBox(height: 8),
-        Center(child: Text(S.noJobs, style: TextStyle(fontSize: 22))),
-      ]);
+      return ListView(
+        children: const [
+          SizedBox(height: 100),
+          Icon(Icons.inbox, size: 64, color: Colors.black38),
+          SizedBox(height: 8),
+          Center(child: Text(S.noJobs, style: TextStyle(fontSize: 22))),
+        ],
+      );
     }
     return ListView.builder(
       physics: const AlwaysScrollableScrollPhysics(),

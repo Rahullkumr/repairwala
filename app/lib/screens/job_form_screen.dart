@@ -69,8 +69,19 @@ class _JobFormScreenState extends State<JobFormScreen> {
     _timer?.cancel();
     _rec.dispose();
     for (final c in [
-      _phone, _name, _village, _complaint, _diagnosis, _estimate, _workDone,
-      _finalAmount, _brand, _model, _rating, _serial, _transcript,
+      _phone,
+      _name,
+      _village,
+      _complaint,
+      _diagnosis,
+      _estimate,
+      _workDone,
+      _finalAmount,
+      _brand,
+      _model,
+      _rating,
+      _serial,
+      _transcript,
     ]) {
       c.dispose();
     }
@@ -165,7 +176,10 @@ class _JobFormScreenState extends State<JobFormScreen> {
     final path = '${dir.path}/say_${DateTime.now().millisecondsSinceEpoch}.wav';
     await _rec.start(
       const RecordConfig(
-          encoder: AudioEncoder.wav, sampleRate: 16000, numChannels: 1),
+        encoder: AudioEncoder.wav,
+        sampleRate: 16000,
+        numChannels: 1,
+      ),
       path: path,
     );
     _recSeconds = 0;
@@ -279,15 +293,18 @@ class _JobFormScreenState extends State<JobFormScreen> {
       );
       if (!mounted) return;
       if (_intake) {
-        await Navigator.of(context).pushReplacement(MaterialPageRoute(
-            builder: (_) => _JobNumberScreen(jobId: job.id)));
+        await Navigator.of(context).pushReplacement(
+          MaterialPageRoute(builder: (_) => _JobNumberScreen(jobId: job.id)),
+        );
       } else {
         final m = ScaffoldMessenger.of(context);
         Navigator.of(context).pop();
-        m.showSnackBar(SnackBar(
-          content: const Text(S.quickSaved, style: TextStyle(fontSize: 20)),
-          backgroundColor: kGreen,
-        ));
+        m.showSnackBar(
+          SnackBar(
+            content: const Text(S.quickSaved, style: TextStyle(fontSize: 20)),
+            backgroundColor: kGreen,
+          ),
+        );
       }
     } catch (e) {
       if (mounted) {
@@ -314,8 +331,14 @@ class _JobFormScreenState extends State<JobFormScreen> {
     setState(() => _pickup = DateTime(n.year, n.month, n.day + days));
   }
 
-  Widget _field(TextEditingController c, String label, IconData icon,
-      {TextInputType? type, int lines = 1, List<TextInputFormatter>? fmt}) {
+  Widget _field(
+    TextEditingController c,
+    String label,
+    IconData icon, {
+    TextInputType? type,
+    int lines = 1,
+    List<TextInputFormatter>? fmt,
+  }) {
     return Padding(
       padding: const EdgeInsets.only(bottom: 12),
       child: TextField(
@@ -330,86 +353,118 @@ class _JobFormScreenState extends State<JobFormScreen> {
     );
   }
 
-  Widget _photoTile(String label, IconData icon, XFile? file, VoidCallback tap,
-      {String? note}) {
+  Widget _photoTile(
+    String label,
+    IconData icon,
+    XFile? file,
+    VoidCallback tap, {
+    String? note,
+  }) {
     return Expanded(
-      child: Column(children: [
-        InkWell(
-          onTap: _busy ? null : tap,
-          child: Container(
-            height: 120,
-            decoration: BoxDecoration(
-              color: Colors.white,
-              border: Border.all(color: kGreen, width: 2),
-              borderRadius: BorderRadius.circular(12),
+      child: Column(
+        children: [
+          InkWell(
+            onTap: _busy ? null : tap,
+            child: Container(
+              height: 120,
+              decoration: BoxDecoration(
+                color: Colors.white,
+                border: Border.all(color: kGreen, width: 2),
+                borderRadius: BorderRadius.circular(12),
+              ),
+              clipBehavior: Clip.antiAlias,
+              child: file == null
+                  ? Center(child: Icon(icon, size: 48, color: kGreen))
+                  : Image.file(
+                      File(file.path),
+                      fit: BoxFit.cover,
+                      width: double.infinity,
+                    ),
             ),
-            clipBehavior: Clip.antiAlias,
-            child: file == null
-                ? Center(child: Icon(icon, size: 48, color: kGreen))
-                : Image.file(File(file.path),
-                    fit: BoxFit.cover, width: double.infinity),
           ),
-        ),
-        const SizedBox(height: 4),
-        Text(label,
+          const SizedBox(height: 4),
+          Text(
+            label,
             textAlign: TextAlign.center,
-            style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
-        if (note != null)
-          Text(note,
+            style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+          ),
+          if (note != null)
+            Text(
+              note,
               textAlign: TextAlign.center,
-              style: const TextStyle(fontSize: 13, color: Colors.black87)),
-      ]),
+              style: const TextStyle(fontSize: 13, color: Colors.black87),
+            ),
+        ],
+      ),
     );
   }
 
   Widget _mic() {
     final c = _recording ? kRed : kGreen;
-    return Column(children: [
-      Text(_intake ? S.hintIntake : S.hintQuick,
-          textAlign: TextAlign.center, style: const TextStyle(fontSize: 18)),
-      const SizedBox(height: 10),
-      GestureDetector(
-        onTap: _toggleRecord,
-        child: _Pulse(
-          active: _recording,
-          child: Container(
-            height: 100,
-            width: double.infinity,
-            decoration: BoxDecoration(
-              color: c,
-              borderRadius: BorderRadius.circular(24),
-            ),
-            alignment: Alignment.center,
-            child: Row(mainAxisAlignment: MainAxisAlignment.center, children: [
-              Icon(_recording ? Icons.stop : Icons.mic,
-                  color: Colors.white, size: 48),
-              const SizedBox(width: 12),
-              Text(
-                _recording
-                    ? '${S.stopSpeak}  ${(_recSeconds ~/ 60).toString().padLeft(2, '0')}:${(_recSeconds % 60).toString().padLeft(2, '0')}'
-                    : S.speak,
-                style: const TextStyle(
-                    color: Colors.white,
-                    fontSize: 30,
-                    fontWeight: FontWeight.bold),
+    return Column(
+      children: [
+        Text(
+          _intake ? S.hintIntake : S.hintQuick,
+          textAlign: TextAlign.center,
+          style: const TextStyle(fontSize: 18),
+        ),
+        const SizedBox(height: 10),
+        GestureDetector(
+          onTap: _toggleRecord,
+          child: _Pulse(
+            active: _recording,
+            child: Container(
+              height: 100,
+              width: double.infinity,
+              decoration: BoxDecoration(
+                color: c,
+                borderRadius: BorderRadius.circular(24),
               ),
-            ]),
+              alignment: Alignment.center,
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  Icon(
+                    _recording ? Icons.stop : Icons.mic,
+                    color: Colors.white,
+                    size: 48,
+                  ),
+                  const SizedBox(width: 12),
+                  Text(
+                    _recording
+                        ? '${S.stopSpeak}  ${(_recSeconds ~/ 60).toString().padLeft(2, '0')}:${(_recSeconds % 60).toString().padLeft(2, '0')}'
+                        : S.speak,
+                    style: const TextStyle(
+                      color: Colors.white,
+                      fontSize: 30,
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
+                ],
+              ),
+            ),
           ),
         ),
-      ),
-      if (_busyText.isNotEmpty) _progress(_busyText),
-    ]);
+        if (_busyText.isNotEmpty) _progress(_busyText),
+      ],
+    );
   }
 
   Widget _progress(String t) => Padding(
-        padding: const EdgeInsets.symmetric(vertical: 10),
-        child: Row(mainAxisAlignment: MainAxisAlignment.center, children: [
-          const SizedBox(
-              width: 28, height: 28, child: CircularProgressIndicator()),
-          const SizedBox(width: 12),
-          Text(t, style: const TextStyle(fontSize: 22)),
-        ]),
-      );
+    padding: const EdgeInsets.symmetric(vertical: 10),
+    child: Row(
+      mainAxisAlignment: MainAxisAlignment.center,
+      children: [
+        const SizedBox(
+          width: 28,
+          height: 28,
+          child: CircularProgressIndicator(),
+        ),
+        const SizedBox(width: 12),
+        Text(t, style: const TextStyle(fontSize: 22)),
+      ],
+    ),
+  );
 
   Widget _customerBanner() {
     final l = _lookup;
@@ -420,27 +475,46 @@ class _JobFormScreenState extends State<JobFormScreen> {
       color: const Color(0xFFE3F2E1),
       child: Padding(
         padding: const EdgeInsets.all(12),
-        child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-          Row(children: [
-            const Icon(Icons.verified_user, color: kGreen, size: 28),
-            const SizedBox(width: 8),
-            Text(S.oldCustomer,
-                style:
-                    const TextStyle(fontSize: 22, fontWeight: FontWeight.bold)),
-          ]),
-          Text([c.name ?? '', c.village ?? ''].where((e) => e.isNotEmpty).join(' · '),
-              style: const TextStyle(fontSize: 20)),
-          if (l.jobs.isNotEmpty) ...[
-            const SizedBox(height: 6),
-            Text('${S.pastJobs}: ${l.jobs.length}',
-                style: const TextStyle(
-                    fontSize: 18, fontWeight: FontWeight.bold)),
-            for (final j in recent)
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Row(
+              children: [
+                const Icon(Icons.verified_user, color: kGreen, size: 28),
+                const SizedBox(width: 8),
+                Text(
+                  S.oldCustomer,
+                  style: const TextStyle(
+                    fontSize: 22,
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
+              ],
+            ),
+            Text(
+              [
+                c.name ?? '',
+                c.village ?? '',
+              ].where((e) => e.isNotEmpty).join(' · '),
+              style: const TextStyle(fontSize: 20),
+            ),
+            if (l.jobs.isNotEmpty) ...[
+              const SizedBox(height: 6),
               Text(
+                '${S.pastJobs}: ${l.jobs.length}',
+                style: const TextStyle(
+                  fontSize: 18,
+                  fontWeight: FontWeight.bold,
+                ),
+              ),
+              for (final j in recent)
+                Text(
                   '#${j.id} · ${S.applianceLabel(j.appliance)} · ${fmtDate(j.createdAt)} · ${S.statusLabel(j.status)}',
-                  style: const TextStyle(fontSize: 17)),
+                  style: const TextStyle(fontSize: 17),
+                ),
+            ],
           ],
-        ]),
+        ),
       ),
     );
   }
@@ -467,20 +541,24 @@ class _JobFormScreenState extends State<JobFormScreen> {
 
   Widget _payChoice() {
     Widget chip(String v, String label, IconData icon) => ChoiceChip(
-          selected: _pay == v,
-          onSelected: (_) => setState(() => _pay = v),
-          avatar: Icon(icon, size: 26),
-          label: Padding(
-            padding: const EdgeInsets.symmetric(vertical: 10),
-            child: Text(label, style: const TextStyle(fontSize: 20)),
-          ),
-          selectedColor: const Color(0xFFB7D9B0),
-        );
-    return Wrap(spacing: 8, runSpacing: 8, children: [
-      chip('cash', S.cash, Icons.payments),
-      chip('upi', S.upiPay, Icons.qr_code),
-      chip('none', S.notYet, Icons.hourglass_empty),
-    ]);
+      selected: _pay == v,
+      onSelected: (_) => setState(() => _pay = v),
+      avatar: Icon(icon, size: 26),
+      label: Padding(
+        padding: const EdgeInsets.symmetric(vertical: 10),
+        child: Text(label, style: const TextStyle(fontSize: 20)),
+      ),
+      selectedColor: const Color(0xFFB7D9B0),
+    );
+    return Wrap(
+      spacing: 8,
+      runSpacing: 8,
+      children: [
+        chip('cash', S.cash, Icons.payments),
+        chip('upi', S.upiPay, Icons.qr_code),
+        chip('none', S.notYet, Icons.hourglass_empty),
+      ],
+    );
   }
 
   @override
@@ -491,30 +569,54 @@ class _JobFormScreenState extends State<JobFormScreen> {
       body: ListView(
         padding: const EdgeInsets.all(14),
         children: [
-          _field(_phone, S.phone, Icons.phone,
-              type: TextInputType.number,
-              fmt: [...digits, LengthLimitingTextInputFormatter(10)]),
+          _field(
+            _phone,
+            S.phone,
+            Icons.phone,
+            type: TextInputType.number,
+            fmt: [...digits, LengthLimitingTextInputFormatter(10)],
+          ),
           _customerBanner(),
           const SizedBox(height: 8),
-          Row(crossAxisAlignment: CrossAxisAlignment.start, children: [
-            _photoTile(S.machinePhoto, Icons.photo_camera, _machinePhoto,
-                _takeMachine),
-            const SizedBox(width: 8),
-            _photoTile(S.platePhoto, Icons.document_scanner, _platePhoto,
-                _takePlate),
-            if (_intake) ...[
+          Row(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              _photoTile(
+                S.machinePhoto,
+                Icons.photo_camera,
+                _machinePhoto,
+                _takeMachine,
+              ),
               const SizedBox(width: 8),
-              _photoTile(S.customerPhoto, Icons.face, _customerPhoto,
+              _photoTile(
+                S.platePhoto,
+                Icons.document_scanner,
+                _platePhoto,
+                _takePlate,
+              ),
+              if (_intake) ...[
+                const SizedBox(width: 8),
+                _photoTile(
+                  S.customerPhoto,
+                  Icons.face,
+                  _customerPhoto,
                   _takeCustomer,
-                  note: S.customerPhotoNote),
+                  note: S.customerPhotoNote,
+                ),
+              ],
             ],
-          ]),
+          ),
           const SizedBox(height: 16),
           _mic(),
           const SizedBox(height: 12),
           if (_transcript.text.isNotEmpty || _busyText.isNotEmpty)
-            _field(_transcript, S.transcript, Icons.subtitles,
-                type: TextInputType.multiline, lines: 2),
+            _field(
+              _transcript,
+              S.transcript,
+              Icons.subtitles,
+              type: TextInputType.multiline,
+              lines: 2,
+            ),
           if (_transcript.text.isNotEmpty && _busyText.isEmpty)
             Padding(
               padding: const EdgeInsets.only(bottom: 12),
@@ -534,20 +636,33 @@ class _JobFormScreenState extends State<JobFormScreen> {
           _field(_complaint, S.complaint, Icons.report_problem, lines: 2),
           _field(_diagnosis, S.diagnosis, Icons.troubleshoot, lines: 2),
           if (_intake) ...[
-            _field(_estimate, S.estimate, Icons.currency_rupee,
-                type: TextInputType.number, fmt: digits),
+            _field(
+              _estimate,
+              S.estimate,
+              Icons.currency_rupee,
+              type: TextInputType.number,
+              fmt: digits,
+            ),
             sectionTitle(S.pickupDate, icon: Icons.event),
-            Wrap(spacing: 8, runSpacing: 8, children: [
-              for (final e in {S.today: 0, S.tomorrow: 1, S.dayAfter: 2}.entries)
-                ActionChip(
-                  avatar: const Icon(Icons.event_available),
-                  label: Padding(
-                    padding: const EdgeInsets.symmetric(vertical: 10),
-                    child: Text(e.key, style: const TextStyle(fontSize: 20)),
+            Wrap(
+              spacing: 8,
+              runSpacing: 8,
+              children: [
+                for (final e in {
+                  S.today: 0,
+                  S.tomorrow: 1,
+                  S.dayAfter: 2,
+                }.entries)
+                  ActionChip(
+                    avatar: const Icon(Icons.event_available),
+                    label: Padding(
+                      padding: const EdgeInsets.symmetric(vertical: 10),
+                      child: Text(e.key, style: const TextStyle(fontSize: 20)),
+                    ),
+                    onPressed: () => _quickDate(e.value),
                   ),
-                  onPressed: () => _quickDate(e.value),
-                ),
-            ]),
+              ],
+            ),
             const SizedBox(height: 8),
             BigButton(
               icon: Icons.calendar_month,
@@ -557,8 +672,13 @@ class _JobFormScreenState extends State<JobFormScreen> {
             ),
           ] else ...[
             _field(_workDone, S.workDone, Icons.handyman, lines: 2),
-            _field(_finalAmount, S.finalAmount, Icons.currency_rupee,
-                type: TextInputType.number, fmt: digits),
+            _field(
+              _finalAmount,
+              S.finalAmount,
+              Icons.currency_rupee,
+              type: TextInputType.number,
+              fmt: digits,
+            ),
             sectionTitle(S.paidQ, icon: Icons.payments),
             _payChoice(),
           ],
@@ -568,17 +688,22 @@ class _JobFormScreenState extends State<JobFormScreen> {
             child: ExpansionTile(
               leading: const Icon(Icons.info_outline, size: 28),
               initiallyExpanded: false,
-              title: const Text(S.machineInfo,
-                  style: TextStyle(fontSize: 22, fontWeight: FontWeight.bold)),
+              title: const Text(
+                S.machineInfo,
+                style: TextStyle(fontSize: 22, fontWeight: FontWeight.bold),
+              ),
               subtitle: _readingPlate
-                  ? const Row(children: [
-                      SizedBox(
+                  ? const Row(
+                      children: [
+                        SizedBox(
                           width: 18,
                           height: 18,
-                          child: CircularProgressIndicator(strokeWidth: 3)),
-                      SizedBox(width: 8),
-                      Text(S.readingPlate, style: TextStyle(fontSize: 18)),
-                    ])
+                          child: CircularProgressIndicator(strokeWidth: 3),
+                        ),
+                        SizedBox(width: 8),
+                        Text(S.readingPlate, style: TextStyle(fontSize: 18)),
+                      ],
+                    )
                   : null,
               childrenPadding: const EdgeInsets.only(top: 8),
               children: [
@@ -615,8 +740,9 @@ class _Pulse extends StatefulWidget {
 
 class _PulseState extends State<_Pulse> with SingleTickerProviderStateMixin {
   late final AnimationController _c = AnimationController(
-      vsync: this, duration: const Duration(milliseconds: 800))
-    ..repeat(reverse: true);
+    vsync: this,
+    duration: const Duration(milliseconds: 800),
+  )..repeat(reverse: true);
 
   @override
   void dispose() {
@@ -653,19 +779,25 @@ class _JobNumberScreen extends StatelessWidget {
               const Icon(Icons.check_circle, color: Colors.white, size: 80),
               const SizedBox(height: 16),
               FittedBox(
-                child: Text('#$jobId',
-                    style: const TextStyle(
-                        color: Colors.white,
-                        fontSize: 140,
-                        fontWeight: FontWeight.w900)),
+                child: Text(
+                  '#$jobId',
+                  style: const TextStyle(
+                    color: Colors.white,
+                    fontSize: 140,
+                    fontWeight: FontWeight.w900,
+                  ),
+                ),
               ),
               const SizedBox(height: 16),
-              const Text(S.writeNumber,
-                  textAlign: TextAlign.center,
-                  style: TextStyle(
-                      color: Colors.white,
-                      fontSize: 30,
-                      fontWeight: FontWeight.bold)),
+              const Text(
+                S.writeNumber,
+                textAlign: TextAlign.center,
+                style: TextStyle(
+                  color: Colors.white,
+                  fontSize: 30,
+                  fontWeight: FontWeight.bold,
+                ),
+              ),
               const SizedBox(height: 40),
               FilledButton(
                 style: FilledButton.styleFrom(
@@ -673,7 +805,9 @@ class _JobNumberScreen extends StatelessWidget {
                   foregroundColor: kGreen,
                   minimumSize: const Size.fromHeight(72),
                   textStyle: const TextStyle(
-                      fontSize: 28, fontWeight: FontWeight.bold),
+                    fontSize: 28,
+                    fontWeight: FontWeight.bold,
+                  ),
                 ),
                 onPressed: () => Navigator.of(context).pop(),
                 child: const Text(S.ok),

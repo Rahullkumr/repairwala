@@ -15,10 +15,12 @@ class SettingsScreen extends StatefulWidget {
 }
 
 class _SettingsScreenState extends State<SettingsScreen> {
-  late final TextEditingController _url =
-      TextEditingController(text: api.baseUrl);
-  late final TextEditingController _token =
-      TextEditingController(text: api.token);
+  late final TextEditingController _url = TextEditingController(
+    text: api.baseUrl,
+  );
+  late final TextEditingController _token = TextEditingController(
+    text: api.token,
+  );
   Health? _health;
   bool _checking = false;
   bool _failed = false;
@@ -28,8 +30,9 @@ class _SettingsScreenState extends State<SettingsScreen> {
     if (!mounted) return;
     showMsg(context, S.saved);
     if (widget.first && api.configured) {
-      Navigator.of(context).pushReplacement(
-          MaterialPageRoute(builder: (_) => const HomeScreen()));
+      Navigator.of(
+        context,
+      ).pushReplacement(MaterialPageRoute(builder: (_) => const HomeScreen()));
     }
   }
 
@@ -54,15 +57,19 @@ class _SettingsScreenState extends State<SettingsScreen> {
   }
 
   Widget _row(String label, IconData icon, bool? ok) => Padding(
-        padding: const EdgeInsets.symmetric(vertical: 6),
-        child: Row(children: [
-          Icon(icon, size: 28),
-          const SizedBox(width: 12),
-          Expanded(child: Text(label, style: const TextStyle(fontSize: 22))),
-          Text(ok == null ? '' : (ok ? '✅' : '❌'),
-              style: const TextStyle(fontSize: 28)),
-        ]),
-      );
+    padding: const EdgeInsets.symmetric(vertical: 6),
+    child: Row(
+      children: [
+        Icon(icon, size: 28),
+        const SizedBox(width: 12),
+        Expanded(child: Text(label, style: const TextStyle(fontSize: 22))),
+        Text(
+          ok == null ? '' : (ok ? '✅' : '❌'),
+          style: const TextStyle(fontSize: 28),
+        ),
+      ],
+    ),
+  );
 
   @override
   Widget build(BuildContext context) {

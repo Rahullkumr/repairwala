@@ -46,11 +46,16 @@ class _NotifyScreenState extends State<NotifyScreen> {
     try {
       final dir = await getTemporaryDirectory();
       if (r.qrUrl != null) {
-        _qr = await api.download(r.qrUrl!, '${dir.path}/job${widget.jobId}-qr.png');
+        _qr = await api.download(
+          r.qrUrl!,
+          '${dir.path}/job${widget.jobId}-qr.png',
+        );
       }
       if (r.voiceUrl != null) {
         _voice = await api.download(
-            r.voiceUrl!, '${dir.path}/job${widget.jobId}-ready.mp3');
+          r.voiceUrl!,
+          '${dir.path}/job${widget.jobId}-ready.mp3',
+        );
       }
     } catch (e) {
       if (mounted) showError(context, e);
@@ -104,12 +109,18 @@ class _NotifyScreenState extends State<NotifyScreen> {
           ),
           const SizedBox(height: 16),
           if (_preparing)
-            Row(mainAxisAlignment: MainAxisAlignment.center, children: const [
-              SizedBox(
-                  width: 28, height: 28, child: CircularProgressIndicator()),
-              SizedBox(width: 12),
-              Text(S.preparing, style: TextStyle(fontSize: 22)),
-            ]),
+            Row(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: const [
+                SizedBox(
+                  width: 28,
+                  height: 28,
+                  child: CircularProgressIndicator(),
+                ),
+                SizedBox(width: 12),
+                Text(S.preparing, style: TextStyle(fontSize: 22)),
+              ],
+            ),
           if (_qr != null)
             Center(
               child: Container(
@@ -134,9 +145,12 @@ class _NotifyScreenState extends State<NotifyScreen> {
               style: FilledButton.styleFrom(
                 backgroundColor: const Color(0xFF1B7F3B),
                 shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(20)),
-                textStyle:
-                    const TextStyle(fontSize: 28, fontWeight: FontWeight.bold),
+                  borderRadius: BorderRadius.circular(20),
+                ),
+                textStyle: const TextStyle(
+                  fontSize: 28,
+                  fontWeight: FontWeight.bold,
+                ),
               ),
               icon: const Icon(Icons.send, size: 36),
               label: const Text(S.sendWhatsapp),

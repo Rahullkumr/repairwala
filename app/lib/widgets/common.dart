@@ -10,11 +10,13 @@ const kRed = Color(0xFFB3261E);
 void showMsg(BuildContext context, String msg, {bool error = false}) {
   final m = ScaffoldMessenger.of(context);
   m.hideCurrentSnackBar();
-  m.showSnackBar(SnackBar(
-    content: Text(msg, style: const TextStyle(fontSize: 20)),
-    backgroundColor: error ? kRed : kGreen,
-    duration: Duration(seconds: error ? 5 : 3),
-  ));
+  m.showSnackBar(
+    SnackBar(
+      content: Text(msg, style: const TextStyle(fontSize: 20)),
+      backgroundColor: error ? kRed : kGreen,
+      duration: Duration(seconds: error ? 5 : 3),
+    ),
+  );
 }
 
 void showError(BuildContext context, Object e) {
@@ -40,13 +42,16 @@ class BigButton extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final style = (outlined ? OutlinedButton.styleFrom : FilledButton.styleFrom)(
-      minimumSize: const Size.fromHeight(64),
-      textStyle: const TextStyle(fontSize: 22, fontWeight: FontWeight.bold),
-      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
-      backgroundColor: outlined ? null : color,
-      foregroundColor: outlined ? color : null,
-    );
+    final style =
+        (outlined ? OutlinedButton.styleFrom : FilledButton.styleFrom)(
+          minimumSize: const Size.fromHeight(64),
+          textStyle: const TextStyle(fontSize: 22, fontWeight: FontWeight.bold),
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(16),
+          ),
+          backgroundColor: outlined ? null : color,
+          foregroundColor: outlined ? color : null,
+        );
     final child = Row(
       mainAxisAlignment: MainAxisAlignment.center,
       children: [
@@ -66,8 +71,13 @@ class AuthImage extends StatelessWidget {
   final String? url;
   final double? width, height;
   final BoxFit fit;
-  const AuthImage(this.url,
-      {super.key, this.width, this.height, this.fit = BoxFit.cover});
+  const AuthImage(
+    this.url, {
+    super.key,
+    this.width,
+    this.height,
+    this.fit = BoxFit.cover,
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -93,14 +103,12 @@ class FullPhotoScreen extends StatelessWidget {
   const FullPhotoScreen(this.url, {super.key});
   @override
   Widget build(BuildContext context) => Scaffold(
-        backgroundColor: Colors.black,
-        appBar: AppBar(),
-        body: Center(
-          child: InteractiveViewer(
-            child: AuthImage(url, fit: BoxFit.contain),
-          ),
-        ),
-      );
+    backgroundColor: Colors.black,
+    appBar: AppBar(),
+    body: Center(
+      child: InteractiveViewer(child: AuthImage(url, fit: BoxFit.contain)),
+    ),
+  );
 }
 
 class StatusChip extends StatelessWidget {
@@ -130,14 +138,24 @@ class StatusChip extends StatelessWidget {
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
       decoration: BoxDecoration(
-          color: c, borderRadius: BorderRadius.circular(20)),
-      child: Row(mainAxisSize: MainAxisSize.min, children: [
-        Icon(i, color: Colors.white, size: 18),
-        const SizedBox(width: 4),
-        Text(S.statusLabel(status),
+        color: c,
+        borderRadius: BorderRadius.circular(20),
+      ),
+      child: Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Icon(i, color: Colors.white, size: 18),
+          const SizedBox(width: 4),
+          Text(
+            S.statusLabel(status),
             style: const TextStyle(
-                color: Colors.white, fontSize: 16, fontWeight: FontWeight.bold)),
-      ]),
+              color: Colors.white,
+              fontSize: 16,
+              fontWeight: FontWeight.bold,
+            ),
+          ),
+        ],
+      ),
     );
   }
 }
@@ -153,12 +171,17 @@ String ymd(DateTime d) =>
     '${d.year.toString().padLeft(4, '0')}-${d.month.toString().padLeft(2, '0')}-${d.day.toString().padLeft(2, '0')}';
 
 Widget sectionTitle(String t, {IconData? icon}) => Padding(
-      padding: const EdgeInsets.only(top: 16, bottom: 8),
-      child: Row(children: [
-        if (icon != null) ...[Icon(icon, size: 26), const SizedBox(width: 8)],
-        Text(t, style: const TextStyle(fontSize: 22, fontWeight: FontWeight.bold)),
-      ]),
-    );
+  padding: const EdgeInsets.only(top: 16, bottom: 8),
+  child: Row(
+    children: [
+      if (icon != null) ...[Icon(icon, size: 26), const SizedBox(width: 8)],
+      Text(
+        t,
+        style: const TextStyle(fontSize: 22, fontWeight: FontWeight.bold),
+      ),
+    ],
+  ),
+);
 
 /// Compact card for a job (used on home and in history lists).
 class JobCard extends StatelessWidget {
@@ -180,18 +203,24 @@ class JobCard extends StatelessWidget {
         c = kOrange;
         t = '${S.today} · ${fmtDate(job.pickupDate)}';
       }
-      pickup = Row(children: [
-        Icon(Icons.event, size: 22, color: c),
-        const SizedBox(width: 6),
-        Flexible(
-            child: Text(t,
-                style: TextStyle(
-                    fontSize: 18,
-                    color: c,
-                    fontWeight: st == null || st > 0
-                        ? FontWeight.normal
-                        : FontWeight.bold))),
-      ]);
+      pickup = Row(
+        children: [
+          Icon(Icons.event, size: 22, color: c),
+          const SizedBox(width: 6),
+          Flexible(
+            child: Text(
+              t,
+              style: TextStyle(
+                fontSize: 18,
+                color: c,
+                fontWeight: st == null || st > 0
+                    ? FontWeight.normal
+                    : FontWeight.bold,
+              ),
+            ),
+          ),
+        ],
+      );
     }
     final who = [
       if ((job.customer?.name ?? '').isNotEmpty) job.customer!.name!,
@@ -204,37 +233,54 @@ class JobCard extends StatelessWidget {
         onTap: onTap,
         child: Padding(
           padding: const EdgeInsets.all(14),
-          child: Row(children: [
-            Column(children: [
-              Text('#${job.id}',
-                  style: const TextStyle(
+          child: Row(
+            children: [
+              Column(
+                children: [
+                  Text(
+                    '#${job.id}',
+                    style: const TextStyle(
                       fontSize: 34,
                       fontWeight: FontWeight.w900,
-                      color: kGreen)),
-              Icon(S.applianceIcon(job.appliance), size: 30),
-            ]),
-            const SizedBox(width: 14),
-            Expanded(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(S.applianceLabel(job.appliance),
-                      style: const TextStyle(
-                          fontSize: 22, fontWeight: FontWeight.bold)),
-                  if (who.isNotEmpty)
-                    Row(children: [
-                      const Icon(Icons.person, size: 20),
-                      const SizedBox(width: 4),
-                      Flexible(
-                          child: Text(who, style: const TextStyle(fontSize: 18))),
-                    ]),
-                  if (pickup != null) pickup,
-                  const SizedBox(height: 6),
-                  StatusChip(job.status),
+                      color: kGreen,
+                    ),
+                  ),
+                  Icon(S.applianceIcon(job.appliance), size: 30),
                 ],
               ),
-            ),
-          ]),
+              const SizedBox(width: 14),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      S.applianceLabel(job.appliance),
+                      style: const TextStyle(
+                        fontSize: 22,
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
+                    if (who.isNotEmpty)
+                      Row(
+                        children: [
+                          const Icon(Icons.person, size: 20),
+                          const SizedBox(width: 4),
+                          Flexible(
+                            child: Text(
+                              who,
+                              style: const TextStyle(fontSize: 18),
+                            ),
+                          ),
+                        ],
+                      ),
+                    if (pickup != null) pickup,
+                    const SizedBox(height: 6),
+                    StatusChip(job.status),
+                  ],
+                ),
+              ),
+            ],
+          ),
         ),
       ),
     );

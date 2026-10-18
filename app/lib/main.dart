@@ -33,16 +33,21 @@ class RepairwalaApp extends StatelessWidget {
       theme: base.copyWith(
         // ThemeData's own textTheme has no font sizes yet (they're added per locale
         // later), so scale the "tall" geometry meant for scripts like Devanagari.
-        textTheme: Typography.tall2021.merge(Typography.blackMountainView).apply(
-          fontSizeFactor: 1.25,
-          bodyColor: Colors.black,
-          displayColor: Colors.black,
-        ),
+        textTheme: Typography.tall2021
+            .merge(Typography.blackMountainView)
+            .apply(
+              fontSizeFactor: 1.25,
+              bodyColor: Colors.black,
+              displayColor: Colors.black,
+            ),
         appBarTheme: const AppBarTheme(
           backgroundColor: kGreen,
           foregroundColor: Colors.white,
           titleTextStyle: TextStyle(
-              fontSize: 24, fontWeight: FontWeight.bold, color: Colors.white),
+            fontSize: 24,
+            fontWeight: FontWeight.bold,
+            color: Colors.white,
+          ),
           toolbarHeight: 64,
         ),
         inputDecorationTheme: InputDecorationTheme(
@@ -50,12 +55,16 @@ class RepairwalaApp extends StatelessWidget {
           fillColor: Colors.white,
           labelStyle: const TextStyle(fontSize: 20),
           border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
-          contentPadding:
-              const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
+          contentPadding: const EdgeInsets.symmetric(
+            horizontal: 16,
+            vertical: 16,
+          ),
         ),
         cardTheme: const CardThemeData(color: Colors.white, elevation: 2),
       ),
-      home: api.configured ? const HomeScreen() : const SettingsScreen(first: true),
+      home: api.configured
+          ? const HomeScreen()
+          : const SettingsScreen(first: true),
     );
   }
 }
