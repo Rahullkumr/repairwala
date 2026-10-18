@@ -162,6 +162,14 @@ class S {
   static String get errAmount => _t('कुल रकम भरें', 'Enter the total amount');
   static String get fixErrors =>
       _t('लाल वाले खाने भरें', 'Please fill in the fields marked in red');
+  static String get editJob => _t('काम बदलें', 'Edit job');
+  static String get deleteJob => _t('मिटाएँ', 'Delete');
+  static String get confirmDelete => _t(
+    'यह काम हमेशा के लिए मिटाएँ? फ़ोटो और संदेश भी मिट जाएँगे।',
+    'Delete this job for good? Its photos and messages go too.',
+  );
+  static String get deleted => _t('काम मिटा दिया', 'Job deleted');
+  static String get changesSaved => _t('बदलाव सेव हो गए', 'Changes saved');
   static String get cancelWait => _t('रोकें', 'Cancel');
   static String secs(int n) => isHindi ? '$n सेकंड' : '${n}s';
   static String get retry => _t('फिर कोशिश करें', 'Try again');

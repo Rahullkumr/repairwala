@@ -15,7 +15,12 @@ import '../theme.dart';
 class JobFormScreen extends StatefulWidget {
   /// 'intake' or 'quick'
   final String kind;
-  const JobFormScreen({super.key, required this.kind});
+
+  /// When set, the form edits this job instead of creating a new one.
+  final Job? job;
+  const JobFormScreen({super.key, required this.kind, this.job});
+
+  JobFormScreen.edit(Job this.job, {super.key}) : kind = job.kind;
 
   @override
   State<JobFormScreen> createState() => _JobFormScreenState();
@@ -23,6 +28,7 @@ class JobFormScreen extends StatefulWidget {
 
 class _JobFormScreenState extends State<JobFormScreen> {
   bool get _intake => widget.kind == 'intake';
+  bool get _editing => widget.job != null;
 
   final _phone = TextEditingController();
   final _name = TextEditingController();
@@ -89,6 +95,27 @@ class _JobFormScreenState extends State<JobFormScreen> {
   @override
   void initState() {
     super.initState();
+    final j = widget.job;
+    if (j != null) {
+      final c = j.customer;
+      _phone.text = c?.phone ?? '';
+      _lookedUp = _phone
+          .text; // don't show this customer as "returning" for their own job
+      _name.text = c?.name ?? '';
+      _village.text = c?.village ?? '';
+      _appliance = j.appliance;
+      _complaint.text = j.complaint ?? '';
+      _diagnosis.text = j.diagnosis ?? '';
+      _estimate.text = j.estimate?.toString() ?? '';
+      _pickup = j.pickupDate == null ? null : DateTime.tryParse(j.pickupDate!);
+      _workDone.text = j.workDone ?? '';
+      _finalAmount.text = j.finalAmount?.toString() ?? '';
+      _pay = j.paid ? (j.payMethod ?? 'cash') : 'none';
+      _brand.text = j.brand ?? '';
+      _model.text = j.model ?? '';
+      _rating.text = j.rating ?? '';
+      _serial.text = j.serial ?? '';
+    }
     _phone.addListener(_onPhone);
     _tick = Timer.periodic(const Duration(seconds: 1), (_) {
       if (mounted && (_busyText.isNotEmpty || _readingPlate || _saving)) {
@@ -374,6 +401,10 @@ class _JobFormScreenState extends State<JobFormScreen> {
       _saving = true;
       _busySince = DateTime.now();
     });
+    if (_editing) {
+      await _saveEdit(data);
+      return;
+    }
     try {
       final job = await api.createJob(
         data,
@@ -396,6 +427,35 @@ class _JobFormScreenState extends State<JobFormScreen> {
           ),
         );
       }
+    } catch (e) {
+      if (mounted) {
+        setState(() => _saving = false);
+        showError(context, e);
+      }
+    }
+  }
+
+  /// Edit mode: sends every field (cleared ones as null), then any newly taken photos.
+  Future<void> _saveEdit(Map<String, dynamic> data) async {
+    final id = widget.job!.id;
+    final changes = Map<String, dynamic>.from(data)
+      ..remove('kind')
+      ..remove('transcript');
+    try {
+      await api.patchJob(id, changes);
+      if (_machinePhoto != null ||
+          _platePhoto != null ||
+          (_intake && _customerPhoto != null)) {
+        await api.uploadPhotos(
+          id,
+          machine: _machinePhoto?.path,
+          plate: _platePhoto?.path,
+          customer: _intake ? _customerPhoto?.path : null,
+        );
+      }
+      if (!mounted) return;
+      showMsg(context, S.changesSaved);
+      Navigator.of(context).pop(true);
     } catch (e) {
       if (mounted) {
         setState(() => _saving = false);
@@ -458,6 +518,7 @@ class _JobFormScreenState extends State<JobFormScreen> {
     XFile? file,
     VoidCallback tap, {
     String? note,
+    String? savedUrl,
   }) {
     return Expanded(
       child: Column(
@@ -475,7 +536,9 @@ class _JobFormScreenState extends State<JobFormScreen> {
                 borderRadius: BorderRadius.circular(12),
               ),
               clipBehavior: Clip.antiAlias,
-              child: file == null
+              child: file == null && savedUrl != null
+                  ? AuthImage(savedUrl, width: double.infinity, height: 120)
+                  : file == null
                   ? Center(
                       child: Icon(
                         icon,
@@ -668,7 +731,9 @@ class _JobFormScreenState extends State<JobFormScreen> {
             avatar: Icon(
               S.applianceIcon(e.key),
               size: 26,
-              color: _appliance == e.key ? Colors.white : null,
+              color: _appliance == e.key
+                  ? Theme.of(context).colorScheme.onPrimary
+                  : null,
             ),
             label: Padding(
               padding: const EdgeInsets.symmetric(vertical: 10),
@@ -676,11 +741,13 @@ class _JobFormScreenState extends State<JobFormScreen> {
                 e.value,
                 style: TextStyle(
                   fontSize: 20,
-                  color: _appliance == e.key ? Colors.white : null,
+                  color: _appliance == e.key
+                      ? Theme.of(context).colorScheme.onPrimary
+                      : null,
                 ),
               ),
             ),
-            selectedColor: kGreen,
+            selectedColor: Theme.of(context).colorScheme.primary,
           ),
       ],
     );
@@ -691,18 +758,22 @@ class _JobFormScreenState extends State<JobFormScreen> {
       selected: _pay == v,
       onSelected: (_) => setState(() => _pay = v),
       showCheckmark: false,
-      avatar: Icon(icon, size: 26, color: _pay == v ? Colors.white : null),
+      avatar: Icon(
+        icon,
+        size: 26,
+        color: _pay == v ? Theme.of(context).colorScheme.onPrimary : null,
+      ),
       label: Padding(
         padding: const EdgeInsets.symmetric(vertical: 10),
         child: Text(
           label,
           style: TextStyle(
             fontSize: 20,
-            color: _pay == v ? Colors.white : null,
+            color: _pay == v ? Theme.of(context).colorScheme.onPrimary : null,
           ),
         ),
       ),
-      selectedColor: kGreen,
+      selectedColor: Theme.of(context).colorScheme.primary,
     );
     return Wrap(
       spacing: 8,
@@ -719,7 +790,13 @@ class _JobFormScreenState extends State<JobFormScreen> {
   Widget build(BuildContext context) {
     final digits = [FilteringTextInputFormatter.digitsOnly];
     return Scaffold(
-      appBar: AppBar(title: Text(_intake ? S.intakeTitle : S.quickTitle)),
+      appBar: AppBar(
+        title: Text(
+          _editing
+              ? '${S.editJob} #${widget.job!.id}'
+              : (_intake ? S.intakeTitle : S.quickTitle),
+        ),
+      ),
       body: ListView(
         controller: _scroll,
         padding: const EdgeInsets.all(14),
@@ -742,6 +819,7 @@ class _JobFormScreenState extends State<JobFormScreen> {
                 Icons.photo_camera,
                 _machinePhoto,
                 _takeMachine,
+                savedUrl: widget.job?.machinePhotoUrl,
               ),
               const SizedBox(width: 8),
               _photoTile(
@@ -749,6 +827,7 @@ class _JobFormScreenState extends State<JobFormScreen> {
                 Icons.document_scanner,
                 _platePhoto,
                 _takePlate,
+                savedUrl: widget.job?.platePhotoUrl,
               ),
               if (_intake) ...[
                 const SizedBox(width: 8),
@@ -758,6 +837,7 @@ class _JobFormScreenState extends State<JobFormScreen> {
                   _customerPhoto,
                   _takeCustomer,
                   note: S.customerPhotoNote,
+                  savedUrl: widget.job?.customer?.photoUrl,
                 ),
               ],
             ],

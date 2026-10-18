@@ -97,8 +97,8 @@ class _SettingsScreenState extends State<SettingsScreen> {
             selected: {S.lang.value},
             showSelectedIcon: false,
             style: SegmentedButton.styleFrom(
-              selectedBackgroundColor: kGreen,
-              selectedForegroundColor: Colors.white,
+              selectedBackgroundColor: Theme.of(context).colorScheme.primary,
+              selectedForegroundColor: Theme.of(context).colorScheme.onPrimary,
             ),
             onSelectionChanged: (s) => S.setLang(s.first),
           ),
@@ -126,8 +126,8 @@ class _SettingsScreenState extends State<SettingsScreen> {
             selected: {AppTheme.mode.value},
             showSelectedIcon: false,
             style: SegmentedButton.styleFrom(
-              selectedBackgroundColor: kGreen,
-              selectedForegroundColor: Colors.white,
+              selectedBackgroundColor: Theme.of(context).colorScheme.primary,
+              selectedForegroundColor: Theme.of(context).colorScheme.onPrimary,
             ),
             onSelectionChanged: (s) => AppTheme.set(s.first),
           ),
