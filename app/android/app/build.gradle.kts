@@ -50,6 +50,7 @@ android {
         release {
             // Without key.properties (a fresh clone), fall back to the debug key so release builds still work.
             signingConfig = signingConfigs.getByName(if (hasReleaseKey) "release" else "debug")
+            proguardFiles(getDefaultProguardFile("proguard-android-optimize.txt"), "proguard-rules.pro")
         }
     }
 }
