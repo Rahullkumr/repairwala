@@ -8,6 +8,7 @@ import '../widgets/common.dart';
 import 'job_detail_screen.dart';
 import 'job_form_screen.dart';
 import 'settings_screen.dart';
+import '../theme.dart';
 
 class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
@@ -75,6 +76,14 @@ class _HomeScreenState extends State<HomeScreen>
       appBar: AppBar(
         title: Text(S.appName),
         actions: [
+          IconButton(
+            iconSize: 30,
+            tooltip: S.switchTheme,
+            icon: Icon(
+              AppTheme.isDark(context) ? Icons.light_mode : Icons.dark_mode,
+            ),
+            onPressed: () => AppTheme.toggle(context),
+          ),
           // One tap switches the whole app between Hindi and English.
           IconButton(
             iconSize: 30,
@@ -197,7 +206,7 @@ class _HomeScreenState extends State<HomeScreen>
       return ListView(
         children: [
           SizedBox(height: 100),
-          Icon(Icons.inbox, size: 64, color: Colors.black38),
+          Icon(Icons.inbox, size: 64, color: Theme.of(context).disabledColor),
           SizedBox(height: 8),
           Center(child: Text(S.noJobs, style: TextStyle(fontSize: 22))),
         ],

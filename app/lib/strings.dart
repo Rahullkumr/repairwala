@@ -152,6 +152,11 @@ class S {
   static String get preparing => _t('तैयार कर रहे हैं…', 'Preparing…');
   static String get loading => _t('लोड हो रहा है…', 'Loading…');
   static String get reparse => _t('फिर से समझें', 'Understand again');
+  static String get theme => _t('रंग', 'Theme');
+  static String get themeSystem => _t('फ़ोन जैसा', 'System');
+  static String get themeLight => _t('हल्का', 'Light');
+  static String get themeDark => _t('गहरा', 'Dark');
+  static String get switchTheme => _t('हल्का/गहरा रंग', 'Light/dark');
   static String get cancelWait => _t('रोकें', 'Cancel');
   static String secs(int n) => isHindi ? '$n सेकंड' : '${n}s';
   static String get retry => _t('फिर कोशिश करें', 'Try again');

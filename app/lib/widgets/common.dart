@@ -206,7 +206,7 @@ class JobCard extends StatelessWidget {
     final st = job.pickupState;
     Widget? pickup;
     if (job.pickupDate != null) {
-      Color c = Colors.black87;
+      Color? c; // default text colour, light or dark
       String t = '${S.pickupDate}: ${fmtDate(job.pickupDate)}';
       if (st == -1) {
         c = kRed;
@@ -251,10 +251,10 @@ class JobCard extends StatelessWidget {
                 children: [
                   Text(
                     '#${job.id}',
-                    style: const TextStyle(
+                    style: TextStyle(
                       fontSize: 34,
                       fontWeight: FontWeight.w900,
-                      color: kGreen,
+                      color: Theme.of(context).colorScheme.primary,
                     ),
                   ),
                   Icon(S.applianceIcon(job.appliance), size: 30),

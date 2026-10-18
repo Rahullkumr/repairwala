@@ -373,10 +373,10 @@ class _JobDetailScreenState extends State<JobDetailScreen> {
           children: [
             Text(
               '#${j.id}',
-              style: const TextStyle(
+              style: TextStyle(
                 fontSize: 48,
                 fontWeight: FontWeight.w900,
-                color: kGreen,
+                color: Theme.of(context).colorScheme.primary,
               ),
             ),
             const SizedBox(width: 16),

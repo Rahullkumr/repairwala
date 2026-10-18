@@ -10,6 +10,7 @@ import 'package:record/record.dart';
 import '../api.dart';
 import '../strings.dart';
 import '../widgets/common.dart';
+import '../theme.dart';
 
 class JobFormScreen extends StatefulWidget {
   /// 'intake' or 'quick'
@@ -407,13 +408,22 @@ class _JobFormScreenState extends State<JobFormScreen> {
             child: Container(
               height: 120,
               decoration: BoxDecoration(
-                color: Colors.white,
-                border: Border.all(color: kGreen, width: 2),
+                color: Theme.of(context).cardTheme.color,
+                border: Border.all(
+                  color: Theme.of(context).colorScheme.primary,
+                  width: 2,
+                ),
                 borderRadius: BorderRadius.circular(12),
               ),
               clipBehavior: Clip.antiAlias,
               child: file == null
-                  ? Center(child: Icon(icon, size: 48, color: kGreen))
+                  ? Center(
+                      child: Icon(
+                        icon,
+                        size: 48,
+                        color: Theme.of(context).colorScheme.primary,
+                      ),
+                    )
                   : Image.file(
                       File(file.path),
                       fit: BoxFit.cover,
@@ -431,7 +441,10 @@ class _JobFormScreenState extends State<JobFormScreen> {
             Text(
               note,
               textAlign: TextAlign.center,
-              style: const TextStyle(fontSize: 13, color: Colors.black87),
+              style: TextStyle(
+                fontSize: 13,
+                color: Theme.of(context).colorScheme.onSurfaceVariant,
+              ),
             ),
         ],
       ),
@@ -526,7 +539,9 @@ class _JobFormScreenState extends State<JobFormScreen> {
     final c = l.customer!;
     final recent = l.jobs.take(3).toList();
     return Card(
-      color: const Color(0xFFE3F2E1),
+      color: AppTheme.isDark(context)
+          ? const Color(0xFF1F3A2A)
+          : const Color(0xFFE3F2E1),
       child: Padding(
         padding: const EdgeInsets.all(12),
         child: Column(
@@ -534,7 +549,11 @@ class _JobFormScreenState extends State<JobFormScreen> {
           children: [
             Row(
               children: [
-                const Icon(Icons.verified_user, color: kGreen, size: 28),
+                Icon(
+                  Icons.verified_user,
+                  color: Theme.of(context).colorScheme.primary,
+                  size: 28,
+                ),
                 const SizedBox(width: 8),
                 Text(
                   S.oldCustomer,
