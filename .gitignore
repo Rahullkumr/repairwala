@@ -1,0 +1,15 @@
+# OS and editor files
+.DS_Store
+Thumbs.db
+desktop.ini
+.idea/
+*.iml
+
+# Logs
+*.log
+npm-debug.log*
+
+# Secrets and private shop data (also covered in server/.gitignore)
+.env
+.env.*
+!.env.example
