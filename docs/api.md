@@ -57,7 +57,7 @@ Job:
 `GET /api/customers/by-phone/:phone` → `{ "customer": Customer | null, "jobs": [Job, ...newest first] }`.
 
 `POST /api/jobs` multipart:
-- field `data`: JSON string `{ "phone", "name", "village", "kind", "appliance", "brand", "model", "rating", "serial", "complaint", "diagnosis", "work_done", "estimate", "final_amount", "pickup_date", "transcript", "paid", "pay_method" }` (phone is required for `intake` and optional for `quick`; the rest are optional. The customer is found by phone or created; name/village update the customer if given. A `quick` job with no phone has `"customer": null`.)
+- field `data`: JSON string `{ "phone", "name", "village", "kind", "appliance", "brand", "model", "rating", "serial", "complaint", "diagnosis", "work_done", "estimate", "final_amount", "pickup_date", "transcript", "paid", "pay_method" }` (`phone` (10-digit mobile starting 6-9), `name` and `appliance` are required for both kinds, and `final_amount` for `quick`; the rest are optional. The customer is found by phone or created; name/village update the customer.)
 - optional files: `machine_photo`, `plate_photo`, `customer_photo` (JPEG).
 - A `quick` job is saved straight away as `delivered` (with `repaired_at` and `delivered_at` set to now).
 → `201` Job.

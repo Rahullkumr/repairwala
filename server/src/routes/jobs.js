@@ -60,11 +60,16 @@ export default async function jobRoutes(app) {
 
     const kind = data.kind ?? 'intake';
     if (kind !== 'intake' && kind !== 'quick') throw bad('kind must be "intake" or "quick"');
+    // Every job needs a customer (phone and name) so the shop builds up history,
+    // and a machine type; a quick fix also needs what was charged.
     const phone = cleanPhone(data.phone);
-    if (kind === 'intake' && !phone) throw bad('phone is required for an intake job');
+    if (!phone) throw bad('phone is required');
 
     const fields = cleanFields(data, EDITABLE);
     const name = text(data.name, 'name', 100);
+    if (!name) throw bad('name is required');
+    if (!fields.appliance) throw bad('appliance is required');
+    if (kind === 'quick' && fields.final_amount == null) throw bad('final_amount is required for a quick job');
     const village = text(data.village, 'village', 100);
     const customerId = phone ? upsertCustomer({ phone, name, village }) : null;
 
