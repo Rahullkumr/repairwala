@@ -52,6 +52,11 @@ android {
             signingConfig = signingConfigs.getByName(if (hasReleaseKey) "release" else "debug")
             proguardFiles(getDefaultProguardFile("proguard-android-optimize.txt"), "proguard-rules.pro")
         }
+        debug {
+            // Same key as releases when it's available, so `flutter run` (hot reload) can
+            // install over the release app on the shop phone without wiping its settings.
+            if (hasReleaseKey) signingConfig = signingConfigs.getByName("release")
+        }
     }
 }
 
