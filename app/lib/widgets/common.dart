@@ -42,9 +42,14 @@ class BigButton extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    // Hindi labels wrap nicely onto two lines ("मशीन / जमा करें"); short English labels
+    // look broken when wrapped ("New / job"), so in English keep them on one line,
+    // with less side padding and shrinking a little if a half-width button is too narrow.
+    final english = !S.isHindi;
     final style =
         (outlined ? OutlinedButton.styleFrom : FilledButton.styleFrom)(
           minimumSize: const Size.fromHeight(64),
+          padding: english ? const EdgeInsets.symmetric(horizontal: 12) : null,
           textStyle: const TextStyle(fontSize: 22, fontWeight: FontWeight.bold),
           shape: RoundedRectangleBorder(
             borderRadius: BorderRadius.circular(16),
@@ -57,7 +62,14 @@ class BigButton extends StatelessWidget {
       children: [
         Icon(icon, size: 30),
         const SizedBox(width: 10),
-        Flexible(child: Text(label, textAlign: TextAlign.center)),
+        Flexible(
+          child: english
+              ? FittedBox(
+                  fit: BoxFit.scaleDown,
+                  child: Text(label, maxLines: 1),
+                )
+              : Text(label, textAlign: TextAlign.center),
+        ),
       ],
     );
     return outlined
