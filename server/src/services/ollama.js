@@ -27,7 +27,10 @@ let thinkSupported = true;
 // Sends a system + user prompt and returns the JSON object that matches `schema`.
 // `images` is an optional list of base64 strings attached to the user message;
 // `model` overrides the default model for this one call.
-export async function chatJSON({ system, user, schema, options = {}, images, model = OLLAMA_MODEL, signal }) {
+// Gives up after 150 s by default: a plate photo takes about a minute on a CPU laptop.
+export async function chatJSON({
+  system, user, schema, options = {}, images, model = OLLAMA_MODEL, signal = AbortSignal.timeout(150_000),
+}) {
   const body = {
     model,
     stream: false,
