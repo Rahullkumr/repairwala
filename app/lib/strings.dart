@@ -151,6 +151,9 @@ class S {
   static String get stopVoice => _t('रोकें', 'Stop');
   static String get preparing => _t('तैयार कर रहे हैं…', 'Preparing…');
   static String get loading => _t('लोड हो रहा है…', 'Loading…');
+  static String get reparse => _t('फिर से समझें', 'Understand again');
+  static String get cancelWait => _t('रोकें', 'Cancel');
+  static String secs(int n) => isHindi ? '$n सेकंड' : '${n}s';
   static String get retry => _t('फिर कोशिश करें', 'Try again');
   static String get paid => _t('पैसे मिल गए', 'Paid');
   static String get notPaid => _t('पैसे बाकी', 'Payment due');

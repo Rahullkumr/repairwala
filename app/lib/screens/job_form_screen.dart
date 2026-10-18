@@ -56,17 +56,31 @@ class _JobFormScreenState extends State<JobFormScreen> {
   bool _readingPlate = false;
   bool _saving = false;
 
+  // Waiting on the laptop can take 10-60 s. Each wait has a number; "Cancel" bumps it,
+  // so a late answer from a cancelled wait is ignored and the form stays usable.
+  int _voiceOp = 0;
+  int _plateOp = 0;
+  DateTime _busySince = DateTime.now();
+  DateTime _plateSince = DateTime.now();
+  Timer? _tick; // redraws the elapsed seconds while something is waiting
+
   bool get _busy => _busyText.isNotEmpty || _saving;
 
   @override
   void initState() {
     super.initState();
     _phone.addListener(_onPhone);
+    _tick = Timer.periodic(const Duration(seconds: 1), (_) {
+      if (mounted && (_busyText.isNotEmpty || _readingPlate || _saving)) {
+        setState(() {});
+      }
+    });
   }
 
   @override
   void dispose() {
     _timer?.cancel();
+    _tick?.cancel();
     _rec.dispose();
     for (final c in [
       _phone,
@@ -137,22 +151,29 @@ class _JobFormScreenState extends State<JobFormScreen> {
   Future<void> _takePlate() async {
     final f = await _shoot(CameraDevice.rear, maxWidth: 1024);
     if (f == null) return;
+    final op = ++_plateOp;
     setState(() {
       _platePhoto = f;
       _readingPlate = true;
+      _plateSince = DateTime.now();
     });
     try {
       final p = await api.readPlate(f.path);
-      if (!mounted) return;
+      if (!mounted || op != _plateOp) return;
       _fill(_brand, p.brand);
       _fill(_model, p.model);
       _fill(_rating, p.rating);
       _fill(_serial, p.serial);
     } catch (e) {
-      if (mounted) showError(context, e);
+      if (mounted && op == _plateOp) showError(context, e);
     } finally {
-      if (mounted && _platePhoto == f) setState(() => _readingPlate = false);
+      if (mounted && op == _plateOp) setState(() => _readingPlate = false);
     }
+  }
+
+  void _cancelPlate() {
+    _plateOp++;
+    setState(() => _readingPlate = false);
   }
 
   void _fill(TextEditingController c, String? v) {
@@ -189,34 +210,47 @@ class _JobFormScreenState extends State<JobFormScreen> {
     setState(() => _recording = true);
   }
 
+  void _setBusy(String text) => setState(() {
+    _busyText = text;
+    _busySince = DateTime.now();
+  });
+
+  void _endBusy(int op) {
+    if (mounted && op == _voiceOp) setState(() => _busyText = '');
+  }
+
+  void _cancelVoice() {
+    _voiceOp++;
+    setState(() => _busyText = '');
+  }
+
   Future<void> _stopAndProcess() async {
     _timer?.cancel();
     final path = await _rec.stop();
-    setState(() {
-      _recording = false;
-      _busyText = S.listening;
-    });
-    if (path == null) {
-      setState(() => _busyText = '');
-      return;
-    }
+    setState(() => _recording = false);
+    if (path == null) return;
+    final op = ++_voiceOp;
+    _setBusy(S.listening);
     try {
       final text = await api.transcribe(path);
-      if (!mounted) return;
+      if (!mounted || op != _voiceOp) return;
       _transcript.text = text;
-      if (text.trim().isNotEmpty) await _parse(text);
+      if (text.trim().isNotEmpty) await _parse(text, op: op);
     } catch (e) {
-      if (mounted) showError(context, e);
+      if (mounted && op == _voiceOp) showError(context, e);
     } finally {
-      if (mounted) setState(() => _busyText = '');
+      _endBusy(op);
     }
   }
 
-  Future<void> _parse(String text) async {
-    setState(() => _busyText = S.understanding);
+  /// Fills the form from the spoken text. Clears its own progress message when done,
+  /// whether it was started by the mic or by the re-understand button.
+  Future<void> _parse(String text, {int? op}) async {
+    op ??= ++_voiceOp;
+    _setBusy(S.understanding);
     try {
       final p = await api.parseIntake(text, widget.kind);
-      if (!mounted) return;
+      if (!mounted || op != _voiceOp) return;
       setState(() {
         _fill(_name, p.name);
         _fill(_village, p.village);
@@ -239,7 +273,9 @@ class _JobFormScreenState extends State<JobFormScreen> {
         }
       });
     } catch (e) {
-      if (mounted) showError(context, e);
+      if (mounted && op == _voiceOp) showError(context, e);
+    } finally {
+      _endBusy(op);
     }
   }
 
@@ -283,7 +319,10 @@ class _JobFormScreenState extends State<JobFormScreen> {
         'pay_method': _pay == 'none' ? null : _pay,
       },
     };
-    setState(() => _saving = true);
+    setState(() {
+      _saving = true;
+      _busySince = DateTime.now();
+    });
     try {
       final job = await api.createJob(
         data,
@@ -445,26 +484,41 @@ class _JobFormScreenState extends State<JobFormScreen> {
             ),
           ),
         ),
-        if (_busyText.isNotEmpty) _progress(_busyText),
+        if (_busyText.isNotEmpty)
+          _progress(_busyText, since: _busySince, onCancel: _cancelVoice),
       ],
     );
   }
 
-  Widget _progress(String t) => Padding(
-    padding: const EdgeInsets.symmetric(vertical: 10),
-    child: Row(
-      mainAxisAlignment: MainAxisAlignment.center,
-      children: [
-        const SizedBox(
-          width: 28,
-          height: 28,
-          child: CircularProgressIndicator(),
+  Widget _progress(String t, {DateTime? since, VoidCallback? onCancel}) =>
+      Padding(
+        padding: const EdgeInsets.symmetric(vertical: 10),
+        child: Wrap(
+          alignment: WrapAlignment.center,
+          crossAxisAlignment: WrapCrossAlignment.center,
+          spacing: 12,
+          runSpacing: 8,
+          children: [
+            const SizedBox(
+              width: 28,
+              height: 28,
+              child: CircularProgressIndicator(),
+            ),
+            Text(
+              since == null ? t : '$t ${S.secs(_elapsed(since))}',
+              style: const TextStyle(fontSize: 22),
+            ),
+            if (onCancel != null)
+              OutlinedButton.icon(
+                onPressed: onCancel,
+                icon: const Icon(Icons.close),
+                label: Text(S.cancelWait, style: const TextStyle(fontSize: 20)),
+              ),
+          ],
         ),
-        const SizedBox(width: 12),
-        Text(t, style: const TextStyle(fontSize: 22)),
-      ],
-    ),
-  );
+      );
+
+  int _elapsed(DateTime since) => DateTime.now().difference(since).inSeconds;
 
   Widget _customerBanner() {
     final l = _lookup;
@@ -622,7 +676,7 @@ class _JobFormScreenState extends State<JobFormScreen> {
               padding: const EdgeInsets.only(bottom: 12),
               child: BigButton(
                 icon: Icons.auto_fix_high,
-                label: S.understanding.replaceAll('…', ''),
+                label: S.reparse,
                 outlined: true,
                 onPressed: _busy ? null : () => _parse(_transcript.text),
               ),
@@ -701,7 +755,17 @@ class _JobFormScreenState extends State<JobFormScreen> {
                           child: CircularProgressIndicator(strokeWidth: 3),
                         ),
                         SizedBox(width: 8),
-                        Text(S.readingPlate, style: TextStyle(fontSize: 18)),
+                        Flexible(
+                          child: Text(
+                            '${S.readingPlate} ${S.secs(_elapsed(_plateSince))}',
+                            style: TextStyle(fontSize: 18),
+                          ),
+                        ),
+                        IconButton(
+                          tooltip: S.cancelWait,
+                          icon: const Icon(Icons.close),
+                          onPressed: _cancelPlate,
+                        ),
                       ],
                     )
                   : null,
@@ -716,7 +780,7 @@ class _JobFormScreenState extends State<JobFormScreen> {
           ),
           const SizedBox(height: 16),
           if (_saving)
-            _progress(S.saving)
+            _progress(S.saving, since: _busySince)
           else
             BigButton(
               icon: Icons.check_circle,
