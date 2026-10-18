@@ -94,7 +94,11 @@ class _SettingsScreenState extends State<SettingsScreen> {
               ),
             ],
             selected: {S.lang.value},
-            showSelectedIcon: true,
+            showSelectedIcon: false,
+            style: SegmentedButton.styleFrom(
+              selectedBackgroundColor: kGreen,
+              selectedForegroundColor: Colors.white,
+            ),
             onSelectionChanged: (s) => S.setLang(s.first),
           ),
           const SizedBox(height: 20),

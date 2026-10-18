@@ -582,12 +582,24 @@ class _JobFormScreenState extends State<JobFormScreen> {
           ChoiceChip(
             selected: _appliance == e.key,
             onSelected: (_) => setState(() => _appliance = e.key),
-            avatar: Icon(S.applianceIcon(e.key), size: 26),
+            // Selection is shown by colour alone; the icon stays instead of a tick.
+            showCheckmark: false,
+            avatar: Icon(
+              S.applianceIcon(e.key),
+              size: 26,
+              color: _appliance == e.key ? Colors.white : null,
+            ),
             label: Padding(
               padding: const EdgeInsets.symmetric(vertical: 10),
-              child: Text(e.value, style: const TextStyle(fontSize: 20)),
+              child: Text(
+                e.value,
+                style: TextStyle(
+                  fontSize: 20,
+                  color: _appliance == e.key ? Colors.white : null,
+                ),
+              ),
             ),
-            selectedColor: const Color(0xFFB7D9B0),
+            selectedColor: kGreen,
           ),
       ],
     );
@@ -597,12 +609,19 @@ class _JobFormScreenState extends State<JobFormScreen> {
     Widget chip(String v, String label, IconData icon) => ChoiceChip(
       selected: _pay == v,
       onSelected: (_) => setState(() => _pay = v),
-      avatar: Icon(icon, size: 26),
+      showCheckmark: false,
+      avatar: Icon(icon, size: 26, color: _pay == v ? Colors.white : null),
       label: Padding(
         padding: const EdgeInsets.symmetric(vertical: 10),
-        child: Text(label, style: const TextStyle(fontSize: 20)),
+        child: Text(
+          label,
+          style: TextStyle(
+            fontSize: 20,
+            color: _pay == v ? Colors.white : null,
+          ),
+        ),
       ),
-      selectedColor: const Color(0xFFB7D9B0),
+      selectedColor: kGreen,
     );
     return Wrap(
       spacing: 8,
