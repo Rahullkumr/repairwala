@@ -6,7 +6,7 @@
 
 Speech-to-text (whisper.cpp) and the language model (Gemma 4 in Ollama) run **on the shop laptop**, so customers' names, numbers and photos never leave the shop.
 
-Built for DEV's [Hacktoberfest Open-Source AI Challenge, Week 2: Side Hustle](https://dev.to/challenges/hacktoberfest-week2-2026-10-12).
+Built for DEV's [Hacktoberfest Open-Source AI Challenge, Week 2: Side Hustle](https://dev.to/challenges/hacktoberfest-week2-2026-10-12). 📝 **[Read the full story on DEV](https://dev.to/rahullkumr/repairwala-a-voice-first-job-book-for-small-repair-shops-with-local-ai-34p1)**
 
 [![Watch the Repairwala demo on YouTube](docs/images/demo-thumbnail.jpg)](https://youtu.be/9ohNuEXWs7g)
 
