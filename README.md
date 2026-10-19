@@ -72,7 +72,7 @@ It prints the address for the phone, for example `http://192.168.1.5:3000`. On W
 
 **3. The app**
 
-Install the APK from [Releases](https://github.com/Rahullkumr/side-hustle/releases), or build it with Flutter 3.44: `cd app && flutter build apk --release`. In the app's **सेटिंग** (Settings), enter the server address and the `SHOP_TOKEN`, then tap **जाँचें** (Check).
+Install the APK from [Releases](https://github.com/Rahullkumr/repairwala/releases), or build it with Flutter 3.44: `cd app && flutter build apk --release`. In the app's **सेटिंग** (Settings), enter the server address and the `SHOP_TOKEN`, then tap **जाँचें** (Check).
 
 Pushing to `main` builds a signed APK and publishes it to Releases (see [.github/workflows/release-apk.yml](.github/workflows/release-apk.yml)). Day-to-day work happens on `dev`.
 
