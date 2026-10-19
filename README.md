@@ -8,6 +8,10 @@ Speech-to-text (whisper.cpp) and the language model (Gemma 4 in Ollama) run **on
 
 Built for DEV's [Hacktoberfest Open-Source AI Challenge, Week 2: Side Hustle](https://dev.to/challenges/hacktoberfest-week2-2026-10-12).
 
+[![Watch the Repairwala demo on YouTube](docs/images/demo-thumbnail.jpg)](https://youtu.be/9ohNuEXWs7g)
+
+▶ **[Watch the 97-second demo video](https://youtu.be/9ohNuEXWs7g)**
+
 ## Features
 
 - **Speak the job, don't type it.** *"रमेश यादव, बरियातू से, सबमर्सिबल मोटर नहीं चल रहा, वाइंडिंग जल गई है, पंद्रह सौ लगेगा, परसों ले जाना"* becomes a job card: name, village, machine, fault, ₹1500 estimate, and a pickup date two days from today. The model only reads the Hindi; code works out the date (*कल*, *परसों*, *बुधवार को*) and checks the amounts, so nothing is invented.
