@@ -57,7 +57,7 @@ Job:
 `GET /api/customers/by-phone/:phone` → `{ "customer": Customer | null, "jobs": [Job, ...newest first] }`.
 
 `POST /api/jobs` multipart:
-- field `data`: JSON string `{ "phone", "name", "village", "kind", "appliance", "brand", "model", "rating", "serial", "complaint", "diagnosis", "work_done", "estimate", "final_amount", "pickup_date", "transcript", "paid", "pay_method" }` (phone is required for `intake` and optional for `quick`; the rest are optional. The customer is found by phone or created; name/village update the customer if given. A `quick` job with no phone has `"customer": null`.)
+- field `data`: JSON string `{ "phone", "name", "village", "kind", "appliance", "brand", "model", "rating", "serial", "complaint", "diagnosis", "work_done", "estimate", "final_amount", "pickup_date", "transcript", "paid", "pay_method" }` (`phone` (10-digit mobile starting 6-9), `name` and `appliance` are required for both kinds, and `final_amount` for `quick`; the rest are optional. The customer is found by phone or created; name/village update the customer.)
 - optional files: `machine_photo`, `plate_photo`, `customer_photo` (JPEG).
 - A `quick` job is saved straight away as `delivered` (with `repaired_at` and `delivered_at` set to now).
 → `201` Job.
@@ -67,6 +67,11 @@ Job:
 `GET /api/jobs/:id` → Job plus `"history": [Job, ...]` (this customer's other jobs, newest first).
 
 `PATCH /api/jobs/:id` JSON with any of `status, work_done, diagnosis, estimate, final_amount, pickup_date, paid, pay_method, appliance, brand, model, rating, serial, complaint` → Job. Setting `status` to `repaired` sets `repaired_at`; to `delivered` or `returned` sets `delivered_at`.
+Also accepts `phone`, `name` and `village`: a new `phone` moves the job to that customer (found or created; a customer left with no jobs is removed), and `name`/`village` are set exactly as sent (the name can't be emptied). The same rules as creating apply (valid phone, an appliance, an amount for `quick`).
+
+`POST /api/jobs/:id/photos` (multipart, any of `machine_photo`, `plate_photo`, `customer_photo`) → Job, with those photos replaced.
+
+`DELETE /api/jobs/:id` → `204`. Deletes the job and its photos, voice note and QR; a customer left with no jobs is removed too.
 
 `POST /api/jobs/:id/notify` JSON `{ "final_amount": 1500, "work_done": "..." }` (both optional; they are saved first). Marks the job `repaired` if it was `received`, builds the customer message, and returns:
 ```json

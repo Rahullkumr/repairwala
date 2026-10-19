@@ -1,8 +1,9 @@
-// Jobs: create, list, read, update, and the "machine is ready" notification.
+// Jobs: create, list, read, update, delete, photos, and the "machine is ready" notification.
 import { writeFile, rm } from 'node:fs/promises';
 import { resolve } from 'node:path';
 import {
   getJob, listJobs, insertJob, updateJob, upsertCustomer, setCustomerPhoto, jobsOfCustomer, nowIso,
+  setCustomerDetails, deleteCustomerIfUnused, deleteJob,
 } from '../db.js';
 import { FILES_DIR, UPI_ID } from '../config.js';
 import { APPLIANCE_KEYS, PAY_METHODS, STATUSES } from '../lib/appliances.js';
@@ -60,11 +61,16 @@ export default async function jobRoutes(app) {
 
     const kind = data.kind ?? 'intake';
     if (kind !== 'intake' && kind !== 'quick') throw bad('kind must be "intake" or "quick"');
+    // Every job needs a customer (phone and name) so the shop builds up history,
+    // and a machine type; a quick fix also needs what was charged.
     const phone = cleanPhone(data.phone);
-    if (kind === 'intake' && !phone) throw bad('phone is required for an intake job');
+    if (!phone) throw bad('phone is required');
 
     const fields = cleanFields(data, EDITABLE);
     const name = text(data.name, 'name', 100);
+    if (!name) throw bad('name is required');
+    if (!fields.appliance) throw bad('appliance is required');
+    if (kind === 'quick' && fields.final_amount == null) throw bad('final_amount is required for a quick job');
     const village = text(data.village, 'village', 100);
     const customerId = phone ? upsertCustomer({ phone, name, village }) : null;
 
@@ -116,12 +122,67 @@ export default async function jobRoutes(app) {
     const body = req.body;
     if (!body || typeof body !== 'object' || Array.isArray(body)) throw bad('JSON body required');
     const fields = cleanFields(body, [...EDITABLE, 'complaint']);
+    if (body.appliance === null) throw bad('appliance is required');
+    const quickAmount = fields.final_amount !== undefined ? fields.final_amount : job.final_amount;
+    if (job.kind === 'quick' && quickAmount == null) throw bad('final_amount is required for a quick job');
     if (body.status !== undefined) {
       if (!STATUSES.includes(body.status)) throw bad(`status must be one of: ${STATUSES.join(', ')}`);
       Object.assign(fields, statusChange(job, body.status));
     }
+
+    // Customer: a new phone moves the job to that customer (found or created);
+    // name and village are set exactly as sent, and the name can't be emptied.
+    const oldCustomerId = job.customer?.id ?? null;
+    let customerId = oldCustomerId;
+    if (body.phone !== undefined) {
+      const phone = cleanPhone(body.phone);
+      if (!phone) throw bad('phone is required');
+      customerId = upsertCustomer({ phone });
+      fields.customer_id = customerId;
+    }
+    if (body.name !== undefined || body.village !== undefined) {
+      if (!customerId) throw bad('phone is required');
+      const name = body.name !== undefined ? text(body.name, 'name', 100) : job.customer?.name;
+      if (!name) throw bad('name is required');
+      const village = body.village !== undefined ? text(body.village, 'village', 100) : job.customer?.village;
+      setCustomerDetails(customerId, { name, village });
+    }
+
     updateJob(job.id, fields);
+    if (customerId !== oldCustomerId) await removeCustomerIfUnused(oldCustomerId);
     return getJob(job.id);
+  });
+
+  // Replaces any of the job's photos (multipart: machine_photo, plate_photo, customer_photo).
+  app.post('/api/jobs/:id/photos', async (req) => {
+    const job = findJob(req.params.id);
+    if (!req.isMultipart()) throw bad('send multipart/form-data');
+    const urls = {};
+    for await (const part of req.parts()) {
+      if (part.type !== 'file') continue;
+      const buf = await part.toBuffer();
+      if (!buf.length) continue;
+      if (part.fieldname === 'machine_photo' || part.fieldname === 'plate_photo') {
+        const kind = part.fieldname === 'machine_photo' ? 'machine' : 'plate';
+        await writeFile(jobFile(job.id, `${kind}.jpg`), buf);
+        urls[`${kind}_photo_url`] = `/files/jobs/${job.id}-${kind}.jpg`;
+      } else if (part.fieldname === 'customer_photo' && job.customer) {
+        await writeFile(resolve(FILES_DIR, 'customers', `${job.customer.id}.jpg`), buf);
+        setCustomerPhoto(job.customer.id, `/files/customers/${job.customer.id}.jpg`);
+      }
+    }
+    updateJob(job.id, urls);
+    return getJob(job.id);
+  });
+
+  // Deletes the job and its files; a customer left with no jobs is removed too.
+  app.delete('/api/jobs/:id', async (req, reply) => {
+    const job = findJob(req.params.id);
+    deleteJob(job.id);
+    await Promise.all(['machine.jpg', 'plate.jpg', 'ready.mp3', 'qr.png']
+      .map((f) => rm(jobFile(job.id, f), { force: true })));
+    await removeCustomerIfUnused(job.customer?.id);
+    return reply.code(204).send();
   });
 
   app.post('/api/jobs/:id/notify', async (req) => {
@@ -167,6 +228,12 @@ export default async function jobRoutes(app) {
       wa_phone: waPhone(fresh.customer?.phone),
     };
   });
+}
+
+async function removeCustomerIfUnused(customerId) {
+  if (deleteCustomerIfUnused(customerId)) {
+    await rm(resolve(FILES_DIR, 'customers', `${customerId}.jpg`), { force: true });
+  }
 }
 
 function findJob(rawId) {

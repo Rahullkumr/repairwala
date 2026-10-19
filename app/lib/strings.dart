@@ -69,10 +69,6 @@ class S {
   static String get quickTitle => _t('तुरंत ठीक किया', 'Fixed on the spot');
   static String get phone =>
       _t('फ़ोन नंबर (10 अंक)', 'Phone number (10 digits)');
-  static String get phoneNeeded => _t(
-    'फ़ोन नंबर ज़रूरी है (10 अंक)',
-    'Phone number is required (10 digits)',
-  );
   static String get oldCustomer => _t('पुराने ग्राहक', 'Returning customer');
   static String get pastJobs => _t('पिछले काम', 'Past jobs');
   static String get machinePhoto => _t('मशीन की फ़ोटो', 'Machine photo');
@@ -85,8 +81,8 @@ class S {
   );
   static String get readingPlate =>
       _t('प्लेट पढ़ रहे हैं…', 'Reading the plate…');
-  static String get speak => _t('बोलिए 🎤', 'Speak 🎤');
-  static String get stopSpeak => _t('रोकिए ⏹', 'Stop ⏹');
+  static String get speak => _t('बोलिए', 'Speak');
+  static String get stopSpeak => _t('रोकिए', 'Stop');
   static String get listening => _t('सुन रहे हैं…', 'Listening…');
   static String get understanding => _t('समझ रहे हैं…', 'Understanding…');
   static String get hintIntake => _t(
@@ -102,6 +98,7 @@ class S {
   static String get micDenied =>
       _t('माइक की इजाज़त चाहिए', 'Microphone permission is needed');
   static String get name => _t('नाम', 'Name');
+  static String get customer => _t('ग्राहक', 'Customer');
   static String get village => _t('गाँव', 'Village');
   static String get appliance => _t('कौन सी मशीन', 'Which machine');
   static String get complaint => _t('शिकायत', 'Complaint');
@@ -110,6 +107,10 @@ class S {
   static String get pickupDate => _t('ले जाने की तारीख़', 'Pickup date');
   static String get pickDate => _t('तारीख़ चुनें', 'Pick a date');
   static String get workDone => _t('क्या किया', 'Work done');
+  // Labels for amounts shown next to a ₹ icon and a ₹ value, so without their own ₹.
+  static String get estimateLabel => _t('अनुमानित ख़र्च', 'Estimated cost');
+  static String get totalLabel => _t('कुल', 'Total');
+  static String get payment => _t('भुगतान', 'Payment');
   static String get finalAmount => _t('कुल ₹', 'Total ₹');
   static String get paidQ => _t('पैसे मिले?', 'Paid?');
   static String get cash => _t('नकद', 'Cash');
@@ -127,10 +128,10 @@ class S {
   static String get ok => _t('ठीक है', 'OK');
   static String get quickSaved => _t('काम सेव हो गया', 'Job saved');
   static String get jobDetail => _t('काम का ब्योरा', 'Job details');
-  static String get call => _t('📞 कॉल करें', '📞 Call');
-  static String get fixed => _t('ठीक हो गया ✅', 'Repaired ✅');
+  static String get call => _t('कॉल करें', 'Call');
+  static String get fixed => _t('ठीक हो गया', 'Repaired');
   static String get resend => _t('फिर से भेजें', 'Send again');
-  static String get handedOver => _t('ग्राहक ले गया 🤝', 'Customer took it 🤝');
+  static String get handedOver => _t('ग्राहक ले गया', 'Customer took it');
   static String get cannotFix =>
       _t('नहीं बनेगा, वापस किया', "Can't fix, returned");
   static String get confirmReturn => _t(
@@ -151,6 +152,31 @@ class S {
   static String get stopVoice => _t('रोकें', 'Stop');
   static String get preparing => _t('तैयार कर रहे हैं…', 'Preparing…');
   static String get loading => _t('लोड हो रहा है…', 'Loading…');
+  static String get reparse => _t('फिर से समझें', 'Understand again');
+  static String get theme => _t('रंग', 'Theme');
+  static String get themeSystem => _t('फ़ोन जैसा', 'System');
+  static String get themeLight => _t('हल्का', 'Light');
+  static String get themeDark => _t('गहरा', 'Dark');
+  static String get switchTheme => _t('हल्का/गहरा रंग', 'Light/dark');
+  static String get errPhone => _t(
+    'सही मोबाइल नंबर भरें (10 अंक)',
+    'Enter a valid 10-digit mobile number',
+  );
+  static String get errName => _t('नाम भरें', 'Enter the name');
+  static String get errAppliance => _t('मशीन चुनें', 'Choose the machine');
+  static String get errAmount => _t('कुल रकम भरें', 'Enter the total amount');
+  static String get fixErrors =>
+      _t('लाल वाले खाने भरें', 'Please fill in the fields marked in red');
+  static String get editJob => _t('काम बदलें', 'Edit job');
+  static String get deleteJob => _t('मिटाएँ', 'Delete');
+  static String get confirmDelete => _t(
+    'यह काम हमेशा के लिए मिटाएँ? फ़ोटो और संदेश भी मिट जाएँगे।',
+    'Delete this job for good? Its photos and messages go too.',
+  );
+  static String get deleted => _t('काम मिटा दिया', 'Job deleted');
+  static String get changesSaved => _t('बदलाव सेव हो गए', 'Changes saved');
+  static String get cancelWait => _t('रोकें', 'Cancel');
+  static String secs(int n) => isHindi ? '$n सेकंड' : '${n}s';
   static String get retry => _t('फिर कोशिश करें', 'Try again');
   static String get paid => _t('पैसे मिल गए', 'Paid');
   static String get notPaid => _t('पैसे बाकी', 'Payment due');

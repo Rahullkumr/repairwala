@@ -4,6 +4,7 @@ import '../api.dart';
 import '../strings.dart';
 import '../widgets/common.dart';
 import 'home_screen.dart';
+import '../theme.dart';
 
 class SettingsScreen extends StatefulWidget {
   /// True on first launch: after saving we replace this screen with Home.
@@ -94,8 +95,41 @@ class _SettingsScreenState extends State<SettingsScreen> {
               ),
             ],
             selected: {S.lang.value},
-            showSelectedIcon: true,
+            showSelectedIcon: false,
+            style: SegmentedButton.styleFrom(
+              selectedBackgroundColor: Theme.of(context).colorScheme.primary,
+              selectedForegroundColor: Theme.of(context).colorScheme.onPrimary,
+            ),
             onSelectionChanged: (s) => S.setLang(s.first),
+          ),
+          const SizedBox(height: 20),
+          Text(S.theme, style: const TextStyle(fontSize: 20)),
+          const SizedBox(height: 8),
+          SegmentedButton<ThemeMode>(
+            segments: [
+              ButtonSegment(
+                value: ThemeMode.system,
+                label: Text(
+                  S.themeSystem,
+                  style: const TextStyle(fontSize: 18),
+                ),
+              ),
+              ButtonSegment(
+                value: ThemeMode.light,
+                label: Text(S.themeLight, style: const TextStyle(fontSize: 18)),
+              ),
+              ButtonSegment(
+                value: ThemeMode.dark,
+                label: Text(S.themeDark, style: const TextStyle(fontSize: 18)),
+              ),
+            ],
+            selected: {AppTheme.mode.value},
+            showSelectedIcon: false,
+            style: SegmentedButton.styleFrom(
+              selectedBackgroundColor: Theme.of(context).colorScheme.primary,
+              selectedForegroundColor: Theme.of(context).colorScheme.onPrimary,
+            ),
+            onSelectionChanged: (s) => AppTheme.set(s.first),
           ),
           const SizedBox(height: 20),
           TextField(

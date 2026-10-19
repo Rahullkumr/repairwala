@@ -10,11 +10,17 @@ import 'package:record/record.dart';
 import '../api.dart';
 import '../strings.dart';
 import '../widgets/common.dart';
+import '../theme.dart';
 
 class JobFormScreen extends StatefulWidget {
   /// 'intake' or 'quick'
   final String kind;
-  const JobFormScreen({super.key, required this.kind});
+
+  /// When set, the form edits this job instead of creating a new one.
+  final Job? job;
+  const JobFormScreen({super.key, required this.kind, this.job});
+
+  JobFormScreen.edit(Job this.job, {super.key}) : kind = job.kind;
 
   @override
   State<JobFormScreen> createState() => _JobFormScreenState();
@@ -22,6 +28,7 @@ class JobFormScreen extends StatefulWidget {
 
 class _JobFormScreenState extends State<JobFormScreen> {
   bool get _intake => widget.kind == 'intake';
+  bool get _editing => widget.job != null;
 
   final _phone = TextEditingController();
   final _name = TextEditingController();
@@ -56,17 +63,72 @@ class _JobFormScreenState extends State<JobFormScreen> {
   bool _readingPlate = false;
   bool _saving = false;
 
+  // Waiting on the laptop can take 10-60 s. Each wait has a number; "Cancel" bumps it,
+  // so a late answer from a cancelled wait is ignored and the form stays usable.
+  int _voiceOp = 0;
+  int _plateOp = 0;
+  DateTime _busySince = DateTime.now();
+  DateTime _plateSince = DateTime.now();
+  Timer? _tick; // redraws the elapsed seconds while something is waiting
+
   bool get _busy => _busyText.isNotEmpty || _saving;
+
+  // Validation: field key -> message, shown in red under the field until it is fixed.
+  final _errors = <String, String>{};
+  final _keys = {
+    for (final k in ['phone', 'name', 'appliance', 'amount']) k: GlobalKey(),
+  };
+  final _scroll = ScrollController();
+  static final _mobile = RegExp(r'^[6-9]\d{9}$');
+
+  Map<String, String> _validate() => {
+    if (!_mobile.hasMatch(_phone.text.trim())) 'phone': S.errPhone,
+    if (_name.text.trim().isEmpty) 'name': S.errName,
+    if (_appliance == null) 'appliance': S.errAppliance,
+    if (!_intake && _num(_finalAmount) == null) 'amount': S.errAmount,
+  };
+
+  void _clearError(String key) {
+    if (_errors.containsKey(key)) setState(() => _errors.remove(key));
+  }
 
   @override
   void initState() {
     super.initState();
+    final j = widget.job;
+    if (j != null) {
+      final c = j.customer;
+      _phone.text = c?.phone ?? '';
+      _lookedUp = _phone
+          .text; // don't show this customer as "returning" for their own job
+      _name.text = c?.name ?? '';
+      _village.text = c?.village ?? '';
+      _appliance = j.appliance;
+      _complaint.text = j.complaint ?? '';
+      _diagnosis.text = j.diagnosis ?? '';
+      _estimate.text = j.estimate?.toString() ?? '';
+      _pickup = j.pickupDate == null ? null : DateTime.tryParse(j.pickupDate!);
+      _workDone.text = j.workDone ?? '';
+      _finalAmount.text = j.finalAmount?.toString() ?? '';
+      _pay = j.paid ? (j.payMethod ?? 'cash') : 'none';
+      _brand.text = j.brand ?? '';
+      _model.text = j.model ?? '';
+      _rating.text = j.rating ?? '';
+      _serial.text = j.serial ?? '';
+    }
     _phone.addListener(_onPhone);
+    _tick = Timer.periodic(const Duration(seconds: 1), (_) {
+      if (mounted && (_busyText.isNotEmpty || _readingPlate || _saving)) {
+        setState(() {});
+      }
+    });
   }
 
   @override
   void dispose() {
     _timer?.cancel();
+    _tick?.cancel();
+    _scroll.dispose();
     _rec.dispose();
     for (final c in [
       _phone,
@@ -104,6 +166,7 @@ class _JobFormScreenState extends State<JobFormScreen> {
       if (c != null) {
         if (_name.text.isEmpty && (c.name ?? '').isNotEmpty) {
           _name.text = c.name!;
+          _clearError('name');
         }
         if (_village.text.isEmpty && (c.village ?? '').isNotEmpty) {
           _village.text = c.village!;
@@ -137,22 +200,29 @@ class _JobFormScreenState extends State<JobFormScreen> {
   Future<void> _takePlate() async {
     final f = await _shoot(CameraDevice.rear, maxWidth: 1024);
     if (f == null) return;
+    final op = ++_plateOp;
     setState(() {
       _platePhoto = f;
       _readingPlate = true;
+      _plateSince = DateTime.now();
     });
     try {
       final p = await api.readPlate(f.path);
-      if (!mounted) return;
+      if (!mounted || op != _plateOp) return;
       _fill(_brand, p.brand);
       _fill(_model, p.model);
       _fill(_rating, p.rating);
       _fill(_serial, p.serial);
     } catch (e) {
-      if (mounted) showError(context, e);
+      if (mounted && op == _plateOp) showError(context, e);
     } finally {
-      if (mounted && _platePhoto == f) setState(() => _readingPlate = false);
+      if (mounted && op == _plateOp) setState(() => _readingPlate = false);
     }
+  }
+
+  void _cancelPlate() {
+    _plateOp++;
+    setState(() => _readingPlate = false);
   }
 
   void _fill(TextEditingController c, String? v) {
@@ -189,34 +259,47 @@ class _JobFormScreenState extends State<JobFormScreen> {
     setState(() => _recording = true);
   }
 
+  void _setBusy(String text) => setState(() {
+    _busyText = text;
+    _busySince = DateTime.now();
+  });
+
+  void _endBusy(int op) {
+    if (mounted && op == _voiceOp) setState(() => _busyText = '');
+  }
+
+  void _cancelVoice() {
+    _voiceOp++;
+    setState(() => _busyText = '');
+  }
+
   Future<void> _stopAndProcess() async {
     _timer?.cancel();
     final path = await _rec.stop();
-    setState(() {
-      _recording = false;
-      _busyText = S.listening;
-    });
-    if (path == null) {
-      setState(() => _busyText = '');
-      return;
-    }
+    setState(() => _recording = false);
+    if (path == null) return;
+    final op = ++_voiceOp;
+    _setBusy(S.listening);
     try {
       final text = await api.transcribe(path);
-      if (!mounted) return;
+      if (!mounted || op != _voiceOp) return;
       _transcript.text = text;
-      if (text.trim().isNotEmpty) await _parse(text);
+      if (text.trim().isNotEmpty) await _parse(text, op: op);
     } catch (e) {
-      if (mounted) showError(context, e);
+      if (mounted && op == _voiceOp) showError(context, e);
     } finally {
-      if (mounted) setState(() => _busyText = '');
+      _endBusy(op);
     }
   }
 
-  Future<void> _parse(String text) async {
-    setState(() => _busyText = S.understanding);
+  /// Fills the form from the spoken text. Clears its own progress message when done,
+  /// whether it was started by the mic or by the re-understand button.
+  Future<void> _parse(String text, {int? op}) async {
+    op ??= ++_voiceOp;
+    _setBusy(S.understanding);
     try {
       final p = await api.parseIntake(text, widget.kind);
-      if (!mounted) return;
+      if (!mounted || op != _voiceOp) return;
       setState(() {
         _fill(_name, p.name);
         _fill(_village, p.village);
@@ -237,9 +320,13 @@ class _JobFormScreenState extends State<JobFormScreen> {
         if (_pickup == null && p.pickupDate != null) {
           _pickup = DateTime.tryParse(p.pickupDate!);
         }
+        // Fields the voice just filled no longer need their red message.
+        _errors.removeWhere((k, _) => !_validate().containsKey(k));
       });
     } catch (e) {
-      if (mounted) showError(context, e);
+      if (mounted && op == _voiceOp) showError(context, e);
+    } finally {
+      _endBusy(op);
     }
   }
 
@@ -248,12 +335,39 @@ class _JobFormScreenState extends State<JobFormScreen> {
 
   Future<void> _save() async {
     final phone = _phone.text.trim();
-    if (_intake && phone.length != 10) {
-      showMsg(context, S.phoneNeeded, error: true);
-      return;
-    }
-    if (phone.isNotEmpty && phone.length != 10) {
-      showMsg(context, S.phoneNeeded, error: true);
+    final errors = _validate();
+    setState(() {
+      _errors
+        ..clear()
+        ..addAll(errors);
+    });
+    if (errors.isNotEmpty) {
+      showMsg(context, S.fixErrors, error: true);
+      // Scroll to the first field that needs fixing, in screen order. The list only
+      // builds rows that are on screen, so if that field is off screen, go to the top
+      // first (all checked fields but the amount are near the top), then to the field.
+      final key = _keys[_keys.keys.firstWhere(errors.containsKey)]!;
+      void reveal() {
+        final ctx = key.currentContext;
+        if (ctx != null) {
+          Scrollable.ensureVisible(
+            ctx,
+            duration: const Duration(milliseconds: 300),
+            alignment: 0.2,
+          );
+        }
+      }
+
+      if (key.currentContext != null) {
+        reveal();
+      } else {
+        await _scroll.animateTo(
+          0,
+          duration: const Duration(milliseconds: 300),
+          curve: Curves.easeOut,
+        );
+        WidgetsBinding.instance.addPostFrameCallback((_) => reveal());
+      }
       return;
     }
     String? nz(TextEditingController c) {
@@ -263,7 +377,7 @@ class _JobFormScreenState extends State<JobFormScreen> {
 
     final data = <String, dynamic>{
       'kind': widget.kind,
-      if (phone.isNotEmpty) 'phone': phone,
+      'phone': phone,
       'name': nz(_name),
       'village': nz(_village),
       'appliance': _appliance,
@@ -283,7 +397,14 @@ class _JobFormScreenState extends State<JobFormScreen> {
         'pay_method': _pay == 'none' ? null : _pay,
       },
     };
-    setState(() => _saving = true);
+    setState(() {
+      _saving = true;
+      _busySince = DateTime.now();
+    });
+    if (_editing) {
+      await _saveEdit(data);
+      return;
+    }
     try {
       final job = await api.createJob(
         data,
@@ -314,6 +435,35 @@ class _JobFormScreenState extends State<JobFormScreen> {
     }
   }
 
+  /// Edit mode: sends every field (cleared ones as null), then any newly taken photos.
+  Future<void> _saveEdit(Map<String, dynamic> data) async {
+    final id = widget.job!.id;
+    final changes = Map<String, dynamic>.from(data)
+      ..remove('kind')
+      ..remove('transcript');
+    try {
+      await api.patchJob(id, changes);
+      if (_machinePhoto != null ||
+          _platePhoto != null ||
+          (_intake && _customerPhoto != null)) {
+        await api.uploadPhotos(
+          id,
+          machine: _machinePhoto?.path,
+          plate: _platePhoto?.path,
+          customer: _intake ? _customerPhoto?.path : null,
+        );
+      }
+      if (!mounted) return;
+      showMsg(context, S.changesSaved);
+      Navigator.of(context).pop(true);
+    } catch (e) {
+      if (mounted) {
+        setState(() => _saving = false);
+        showError(context, e);
+      }
+    }
+  }
+
   // ---------- UI ----------
   Future<void> _pickDate() async {
     final now = DateTime.now();
@@ -331,6 +481,7 @@ class _JobFormScreenState extends State<JobFormScreen> {
     setState(() => _pickup = DateTime(n.year, n.month, n.day + days));
   }
 
+  /// [check] names a validated field: its label gets a " *", and its error shows under it.
   Widget _field(
     TextEditingController c,
     String label,
@@ -338,8 +489,10 @@ class _JobFormScreenState extends State<JobFormScreen> {
     TextInputType? type,
     int lines = 1,
     List<TextInputFormatter>? fmt,
+    String? check,
   }) {
     return Padding(
+      key: check == null ? null : _keys[check],
       padding: const EdgeInsets.only(bottom: 12),
       child: TextField(
         controller: c,
@@ -347,8 +500,14 @@ class _JobFormScreenState extends State<JobFormScreen> {
         minLines: lines,
         maxLines: lines == 1 ? 1 : 5,
         inputFormatters: fmt,
+        onChanged: check == null ? null : (_) => _clearError(check),
         style: const TextStyle(fontSize: 22),
-        decoration: InputDecoration(labelText: label, prefixIcon: Icon(icon)),
+        decoration: InputDecoration(
+          labelText: check == null ? label : '$label *',
+          prefixIcon: Icon(icon),
+          errorText: check == null ? null : _errors[check],
+          errorStyle: const TextStyle(fontSize: 16),
+        ),
       ),
     );
   }
@@ -359,6 +518,7 @@ class _JobFormScreenState extends State<JobFormScreen> {
     XFile? file,
     VoidCallback tap, {
     String? note,
+    String? savedUrl,
   }) {
     return Expanded(
       child: Column(
@@ -368,13 +528,24 @@ class _JobFormScreenState extends State<JobFormScreen> {
             child: Container(
               height: 120,
               decoration: BoxDecoration(
-                color: Colors.white,
-                border: Border.all(color: kGreen, width: 2),
+                color: Theme.of(context).cardTheme.color,
+                border: Border.all(
+                  color: Theme.of(context).colorScheme.primary,
+                  width: 2,
+                ),
                 borderRadius: BorderRadius.circular(12),
               ),
               clipBehavior: Clip.antiAlias,
-              child: file == null
-                  ? Center(child: Icon(icon, size: 48, color: kGreen))
+              child: file == null && savedUrl != null
+                  ? AuthImage(savedUrl, width: double.infinity, height: 120)
+                  : file == null
+                  ? Center(
+                      child: Icon(
+                        icon,
+                        size: 48,
+                        color: Theme.of(context).colorScheme.primary,
+                      ),
+                    )
                   : Image.file(
                       File(file.path),
                       fit: BoxFit.cover,
@@ -392,7 +563,10 @@ class _JobFormScreenState extends State<JobFormScreen> {
             Text(
               note,
               textAlign: TextAlign.center,
-              style: const TextStyle(fontSize: 13, color: Colors.black87),
+              style: TextStyle(
+                fontSize: 13,
+                color: Theme.of(context).colorScheme.onSurfaceVariant,
+              ),
             ),
         ],
       ),
@@ -445,26 +619,41 @@ class _JobFormScreenState extends State<JobFormScreen> {
             ),
           ),
         ),
-        if (_busyText.isNotEmpty) _progress(_busyText),
+        if (_busyText.isNotEmpty)
+          _progress(_busyText, since: _busySince, onCancel: _cancelVoice),
       ],
     );
   }
 
-  Widget _progress(String t) => Padding(
-    padding: const EdgeInsets.symmetric(vertical: 10),
-    child: Row(
-      mainAxisAlignment: MainAxisAlignment.center,
-      children: [
-        const SizedBox(
-          width: 28,
-          height: 28,
-          child: CircularProgressIndicator(),
+  Widget _progress(String t, {DateTime? since, VoidCallback? onCancel}) =>
+      Padding(
+        padding: const EdgeInsets.symmetric(vertical: 10),
+        child: Wrap(
+          alignment: WrapAlignment.center,
+          crossAxisAlignment: WrapCrossAlignment.center,
+          spacing: 12,
+          runSpacing: 8,
+          children: [
+            const SizedBox(
+              width: 28,
+              height: 28,
+              child: CircularProgressIndicator(),
+            ),
+            Text(
+              since == null ? t : '$t ${S.secs(_elapsed(since))}',
+              style: const TextStyle(fontSize: 22),
+            ),
+            if (onCancel != null)
+              OutlinedButton.icon(
+                onPressed: onCancel,
+                icon: const Icon(Icons.close),
+                label: Text(S.cancelWait, style: const TextStyle(fontSize: 20)),
+              ),
+          ],
         ),
-        const SizedBox(width: 12),
-        Text(t, style: const TextStyle(fontSize: 22)),
-      ],
-    ),
-  );
+      );
+
+  int _elapsed(DateTime since) => DateTime.now().difference(since).inSeconds;
 
   Widget _customerBanner() {
     final l = _lookup;
@@ -472,7 +661,9 @@ class _JobFormScreenState extends State<JobFormScreen> {
     final c = l.customer!;
     final recent = l.jobs.take(3).toList();
     return Card(
-      color: const Color(0xFFE3F2E1),
+      color: AppTheme.isDark(context)
+          ? const Color(0xFF1F3A2A)
+          : const Color(0xFFE3F2E1),
       child: Padding(
         padding: const EdgeInsets.all(12),
         child: Column(
@@ -480,7 +671,11 @@ class _JobFormScreenState extends State<JobFormScreen> {
           children: [
             Row(
               children: [
-                const Icon(Icons.verified_user, color: kGreen, size: 28),
+                Icon(
+                  Icons.verified_user,
+                  color: Theme.of(context).colorScheme.primary,
+                  size: 28,
+                ),
                 const SizedBox(width: 8),
                 Text(
                   S.oldCustomer,
@@ -527,13 +722,32 @@ class _JobFormScreenState extends State<JobFormScreen> {
         for (final e in S.appliances.entries)
           ChoiceChip(
             selected: _appliance == e.key,
-            onSelected: (_) => setState(() => _appliance = e.key),
-            avatar: Icon(S.applianceIcon(e.key), size: 26),
+            onSelected: (_) => setState(() {
+              _appliance = e.key;
+              _errors.remove('appliance');
+            }),
+            // Selection is shown by colour alone; the icon stays instead of a tick.
+            showCheckmark: false,
+            avatar: Icon(
+              S.applianceIcon(e.key),
+              size: 26,
+              color: _appliance == e.key
+                  ? Theme.of(context).colorScheme.onPrimary
+                  : null,
+            ),
             label: Padding(
               padding: const EdgeInsets.symmetric(vertical: 10),
-              child: Text(e.value, style: const TextStyle(fontSize: 20)),
+              child: Text(
+                e.value,
+                style: TextStyle(
+                  fontSize: 20,
+                  color: _appliance == e.key
+                      ? Theme.of(context).colorScheme.onPrimary
+                      : null,
+                ),
+              ),
             ),
-            selectedColor: const Color(0xFFB7D9B0),
+            selectedColor: Theme.of(context).colorScheme.primary,
           ),
       ],
     );
@@ -543,12 +757,23 @@ class _JobFormScreenState extends State<JobFormScreen> {
     Widget chip(String v, String label, IconData icon) => ChoiceChip(
       selected: _pay == v,
       onSelected: (_) => setState(() => _pay = v),
-      avatar: Icon(icon, size: 26),
+      showCheckmark: false,
+      avatar: Icon(
+        icon,
+        size: 26,
+        color: _pay == v ? Theme.of(context).colorScheme.onPrimary : null,
+      ),
       label: Padding(
         padding: const EdgeInsets.symmetric(vertical: 10),
-        child: Text(label, style: const TextStyle(fontSize: 20)),
+        child: Text(
+          label,
+          style: TextStyle(
+            fontSize: 20,
+            color: _pay == v ? Theme.of(context).colorScheme.onPrimary : null,
+          ),
+        ),
       ),
-      selectedColor: const Color(0xFFB7D9B0),
+      selectedColor: Theme.of(context).colorScheme.primary,
     );
     return Wrap(
       spacing: 8,
@@ -565,8 +790,15 @@ class _JobFormScreenState extends State<JobFormScreen> {
   Widget build(BuildContext context) {
     final digits = [FilteringTextInputFormatter.digitsOnly];
     return Scaffold(
-      appBar: AppBar(title: Text(_intake ? S.intakeTitle : S.quickTitle)),
+      appBar: AppBar(
+        title: Text(
+          _editing
+              ? '${S.editJob} #${widget.job!.id}'
+              : (_intake ? S.intakeTitle : S.quickTitle),
+        ),
+      ),
       body: ListView(
+        controller: _scroll,
         padding: const EdgeInsets.all(14),
         children: [
           _field(
@@ -575,6 +807,7 @@ class _JobFormScreenState extends State<JobFormScreen> {
             Icons.phone,
             type: TextInputType.number,
             fmt: [...digits, LengthLimitingTextInputFormatter(10)],
+            check: 'phone',
           ),
           _customerBanner(),
           const SizedBox(height: 8),
@@ -586,6 +819,7 @@ class _JobFormScreenState extends State<JobFormScreen> {
                 Icons.photo_camera,
                 _machinePhoto,
                 _takeMachine,
+                savedUrl: widget.job?.machinePhotoUrl,
               ),
               const SizedBox(width: 8),
               _photoTile(
@@ -593,6 +827,7 @@ class _JobFormScreenState extends State<JobFormScreen> {
                 Icons.document_scanner,
                 _platePhoto,
                 _takePlate,
+                savedUrl: widget.job?.platePhotoUrl,
               ),
               if (_intake) ...[
                 const SizedBox(width: 8),
@@ -602,6 +837,7 @@ class _JobFormScreenState extends State<JobFormScreen> {
                   _customerPhoto,
                   _takeCustomer,
                   note: S.customerPhotoNote,
+                  savedUrl: widget.job?.customer?.photoUrl,
                 ),
               ],
             ],
@@ -622,16 +858,30 @@ class _JobFormScreenState extends State<JobFormScreen> {
               padding: const EdgeInsets.only(bottom: 12),
               child: BigButton(
                 icon: Icons.auto_fix_high,
-                label: S.understanding.replaceAll('…', ''),
+                label: S.reparse,
                 outlined: true,
                 onPressed: _busy ? null : () => _parse(_transcript.text),
               ),
             ),
           const Divider(height: 24),
-          _field(_name, S.name, Icons.person),
+          _field(_name, S.name, Icons.person, check: 'name'),
           _field(_village, S.village, Icons.home_work),
-          sectionTitle(S.appliance, icon: Icons.build),
+          KeyedSubtree(
+            key: _keys['appliance'],
+            child: sectionTitle('${S.appliance} *', icon: Icons.build),
+          ),
           _applianceGrid(),
+          if (_errors['appliance'] != null)
+            Padding(
+              padding: const EdgeInsets.only(top: 6, left: 12),
+              child: Text(
+                _errors['appliance']!,
+                style: TextStyle(
+                  fontSize: 16,
+                  color: Theme.of(context).colorScheme.error,
+                ),
+              ),
+            ),
           const SizedBox(height: 16),
           _field(_complaint, S.complaint, Icons.report_problem, lines: 2),
           _field(_diagnosis, S.diagnosis, Icons.troubleshoot, lines: 2),
@@ -678,6 +928,7 @@ class _JobFormScreenState extends State<JobFormScreen> {
               Icons.currency_rupee,
               type: TextInputType.number,
               fmt: digits,
+              check: 'amount',
             ),
             sectionTitle(S.paidQ, icon: Icons.payments),
             _payChoice(),
@@ -701,7 +952,17 @@ class _JobFormScreenState extends State<JobFormScreen> {
                           child: CircularProgressIndicator(strokeWidth: 3),
                         ),
                         SizedBox(width: 8),
-                        Text(S.readingPlate, style: TextStyle(fontSize: 18)),
+                        Flexible(
+                          child: Text(
+                            '${S.readingPlate} ${S.secs(_elapsed(_plateSince))}',
+                            style: TextStyle(fontSize: 18),
+                          ),
+                        ),
+                        IconButton(
+                          tooltip: S.cancelWait,
+                          icon: const Icon(Icons.close),
+                          onPressed: _cancelPlate,
+                        ),
                       ],
                     )
                   : null,
@@ -716,7 +977,7 @@ class _JobFormScreenState extends State<JobFormScreen> {
           ),
           const SizedBox(height: 16),
           if (_saving)
-            _progress(S.saving)
+            _progress(S.saving, since: _busySince)
           else
             BigButton(
               icon: Icons.check_circle,
@@ -739,10 +1000,18 @@ class _Pulse extends StatefulWidget {
 }
 
 class _PulseState extends State<_Pulse> with SingleTickerProviderStateMixin {
-  late final AnimationController _c = AnimationController(
-    vsync: this,
-    duration: const Duration(milliseconds: 800),
-  )..repeat(reverse: true);
+  // Created up front: a lazy controller was first built inside dispose() when the mic
+  // was never used, which Flutter rejects (ancestor lookup on a deactivated widget).
+  late final AnimationController _c;
+
+  @override
+  void initState() {
+    super.initState();
+    _c = AnimationController(
+      vsync: this,
+      duration: const Duration(milliseconds: 800),
+    )..repeat(reverse: true);
+  }
 
   @override
   void dispose() {

@@ -12,7 +12,11 @@ void showMsg(BuildContext context, String msg, {bool error = false}) {
   m.hideCurrentSnackBar();
   m.showSnackBar(
     SnackBar(
-      content: Text(msg, style: const TextStyle(fontSize: 20)),
+      // White on the red/green bar in both light and dark mode.
+      content: Text(
+        msg,
+        style: const TextStyle(fontSize: 20, color: Colors.white),
+      ),
       backgroundColor: error ? kRed : kGreen,
       duration: Duration(seconds: error ? 5 : 3),
     ),
@@ -42,22 +46,37 @@ class BigButton extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    // Hindi labels wrap nicely onto two lines ("मशीन / जमा करें"); short English labels
+    // look broken when wrapped ("New / job"), so in English keep them on one line,
+    // with less side padding and shrinking a little if a half-width button is too narrow.
+    final english = !S.isHindi;
     final style =
         (outlined ? OutlinedButton.styleFrom : FilledButton.styleFrom)(
           minimumSize: const Size.fromHeight(64),
+          padding: english ? const EdgeInsets.symmetric(horizontal: 12) : null,
           textStyle: const TextStyle(fontSize: 22, fontWeight: FontWeight.bold),
           shape: RoundedRectangleBorder(
             borderRadius: BorderRadius.circular(16),
           ),
           backgroundColor: outlined ? null : color,
-          foregroundColor: outlined ? color : null,
+          // A coloured button always gets white text, in light and dark mode.
+          foregroundColor: outlined
+              ? color
+              : (color != null ? Colors.white : null),
         );
     final child = Row(
       mainAxisAlignment: MainAxisAlignment.center,
       children: [
         Icon(icon, size: 30),
         const SizedBox(width: 10),
-        Flexible(child: Text(label, textAlign: TextAlign.center)),
+        Flexible(
+          child: english
+              ? FittedBox(
+                  fit: BoxFit.scaleDown,
+                  child: Text(label, maxLines: 1),
+                )
+              : Text(label, textAlign: TextAlign.center),
+        ),
       ],
     );
     return outlined
@@ -194,7 +213,7 @@ class JobCard extends StatelessWidget {
     final st = job.pickupState;
     Widget? pickup;
     if (job.pickupDate != null) {
-      Color c = Colors.black87;
+      Color? c; // default text colour, light or dark
       String t = '${S.pickupDate}: ${fmtDate(job.pickupDate)}';
       if (st == -1) {
         c = kRed;
@@ -239,10 +258,10 @@ class JobCard extends StatelessWidget {
                 children: [
                   Text(
                     '#${job.id}',
-                    style: const TextStyle(
+                    style: TextStyle(
                       fontSize: 34,
                       fontWeight: FontWeight.w900,
-                      color: kGreen,
+                      color: Theme.of(context).colorScheme.primary,
                     ),
                   ),
                   Icon(S.applianceIcon(job.appliance), size: 30),

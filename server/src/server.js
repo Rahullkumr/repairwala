@@ -16,7 +16,9 @@ import customerRoutes from './routes/customers.js';
 import jobRoutes from './routes/jobs.js';
 import fileRoutes from './routes/files.js';
 
-const app = Fastify({ logger: true });
+// A request that stalls (say, the phone drops off Wi-Fi mid-upload) is closed after
+// 3 minutes instead of hanging forever.
+const app = Fastify({ logger: true, requestTimeout: 180_000 });
 
 await app.register(multipart, { limits: { fileSize: 25 * 1024 * 1024, files: 4 } });
 

@@ -102,6 +102,20 @@ export function setCustomerPhoto(id, url) {
   db.prepare('UPDATE customers SET photo_url = ? WHERE id = ?').run(url, id);
 }
 
+// Sets name and village exactly as given (an edit may clear the village).
+export function setCustomerDetails(id, { name, village }) {
+  db.prepare('UPDATE customers SET name = ?, village = ? WHERE id = ?').run(name ?? null, village ?? null, id);
+}
+
+// Removes a customer who no longer has any job. Returns true if it was removed.
+export function deleteCustomerIfUnused(id) {
+  if (!id) return false;
+  const used = db.prepare('SELECT 1 FROM jobs WHERE customer_id = ? LIMIT 1').get(id);
+  if (used) return false;
+  db.prepare('DELETE FROM customers WHERE id = ?').run(id);
+  return true;
+}
+
 // ---- jobs ----
 
 export function getJob(id) {
@@ -135,6 +149,10 @@ export function updateJob(id, fields) {
   if (!cols.length) return;
   db.prepare(`UPDATE jobs SET ${cols.map((c) => `${c} = ?`).join(', ')} WHERE id = ?`)
     .run(...cols.map((c) => toDb(fields[c])), id);
+}
+
+export function deleteJob(id) {
+  db.prepare('DELETE FROM jobs WHERE id = ?').run(id);
 }
 
 const toDb = (v) => (typeof v === 'boolean' ? Number(v) : v ?? null);

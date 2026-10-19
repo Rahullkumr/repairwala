@@ -6,6 +6,7 @@ import '../api.dart';
 import '../strings.dart';
 import '../widgets/common.dart';
 import 'notify_screen.dart';
+import 'job_form_screen.dart';
 
 class JobDetailScreen extends StatefulWidget {
   final int jobId;
@@ -189,84 +190,46 @@ class _JobDetailScreenState extends State<JobDetailScreen> {
   }
 
   Future<void> _edit() async {
-    final j = _job!;
-    final est = TextEditingController(text: '${j.estimate ?? ''}');
-    final diag = TextEditingController(text: j.diagnosis ?? '');
-    DateTime? pickup = j.pickupDate == null
-        ? null
-        : DateTime.tryParse(j.pickupDate!);
-    final ok = await showModalBottomSheet<bool>(
+    final changed = await Navigator.of(
+      context,
+    ).push<bool>(MaterialPageRoute(builder: (_) => JobFormScreen.edit(_job!)));
+    if (changed == true) await _load();
+  }
+
+  Future<void> _delete() async {
+    final ok = await showDialog<bool>(
       context: context,
-      isScrollControlled: true,
-      builder: (ctx) => StatefulBuilder(
-        builder: (ctx, setS) => Padding(
-          padding: EdgeInsets.fromLTRB(
-            16,
-            16,
-            16,
-            MediaQuery.of(ctx).viewInsets.bottom + 16,
+      builder: (ctx) => AlertDialog(
+        title: Text(S.confirmDelete, style: const TextStyle(fontSize: 22)),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(ctx, false),
+            child: Text(S.no, style: const TextStyle(fontSize: 22)),
           ),
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              TextField(
-                controller: est,
-                keyboardType: TextInputType.number,
-                inputFormatters: [FilteringTextInputFormatter.digitsOnly],
-                style: const TextStyle(fontSize: 24),
-                decoration: InputDecoration(
-                  labelText: S.estimate,
-                  prefixIcon: Icon(Icons.currency_rupee),
-                ),
-              ),
-              const SizedBox(height: 12),
-              TextField(
-                controller: diag,
-                style: const TextStyle(fontSize: 22),
-                decoration: InputDecoration(
-                  labelText: S.diagnosis,
-                  prefixIcon: Icon(Icons.troubleshoot),
-                ),
-              ),
-              const SizedBox(height: 12),
-              BigButton(
-                icon: Icons.calendar_month,
-                label: pickup == null
-                    ? S.pickupDate
-                    : '${S.pickupDate}: ${fmtDate(ymd(pickup!))}',
-                outlined: true,
-                onPressed: () async {
-                  final now = DateTime.now();
-                  final d = await showDatePicker(
-                    context: ctx,
-                    initialDate: pickup ?? now,
-                    firstDate: now.subtract(const Duration(days: 60)),
-                    lastDate: now.add(const Duration(days: 365)),
-                  );
-                  if (d != null) setS(() => pickup = d);
-                },
-              ),
-              const SizedBox(height: 12),
-              BigButton(
-                icon: Icons.save,
-                label: S.save,
-                onPressed: () => Navigator.pop(ctx, true),
-              ),
-            ],
+          FilledButton(
+            style: FilledButton.styleFrom(
+              backgroundColor: kRed,
+              foregroundColor: Colors.white,
+            ),
+            onPressed: () => Navigator.pop(ctx, true),
+            child: Text(S.deleteJob, style: const TextStyle(fontSize: 22)),
           ),
-        ),
+        ],
       ),
     );
-    if (ok != true) return;
-    await _run(
-      () => api
-          .patchJob(j.id, {
-            'estimate': int.tryParse(est.text.trim()),
-            'diagnosis': diag.text.trim().isEmpty ? null : diag.text.trim(),
-            if (pickup != null) 'pickup_date': ymd(pickup!),
-          })
-          .then((_) {}),
-    );
+    if (ok != true || !mounted) return;
+    setState(() => _busy = true);
+    try {
+      await api.deleteJob(_job!.id);
+      if (!mounted) return;
+      showMsg(context, S.deleted);
+      Navigator.of(context).pop(true);
+    } catch (e) {
+      if (mounted) {
+        setState(() => _busy = false);
+        showError(context, e);
+      }
+    }
   }
 
   Future<void> _call(String phone) async {
@@ -325,15 +288,22 @@ class _JobDetailScreenState extends State<JobDetailScreen> {
     final j = _job;
     return Scaffold(
       appBar: AppBar(
-        title: Text(j == null ? S.jobDetail : '#${j.id}'),
+        title: Text(S.jobDetail),
         actions: [
-          if (j != null && j.isOpen)
+          if (j != null) ...[
             IconButton(
               iconSize: 30,
               tooltip: S.edit,
               icon: const Icon(Icons.edit),
               onPressed: _busy ? null : _edit,
             ),
+            IconButton(
+              iconSize: 30,
+              tooltip: S.deleteJob,
+              icon: const Icon(Icons.delete_outline),
+              onPressed: _busy ? null : _delete,
+            ),
+          ],
         ],
       ),
       body: j == null
@@ -373,10 +343,10 @@ class _JobDetailScreenState extends State<JobDetailScreen> {
           children: [
             Text(
               '#${j.id}',
-              style: const TextStyle(
+              style: TextStyle(
                 fontSize: 48,
                 fontWeight: FontWeight.w900,
-                color: kGreen,
+                color: Theme.of(context).colorScheme.primary,
               ),
             ),
             const SizedBox(width: 16),
@@ -409,7 +379,7 @@ class _JobDetailScreenState extends State<JobDetailScreen> {
               ],
             ),
           ),
-        sectionTitle(S.name, icon: Icons.person),
+        sectionTitle(S.customer, icon: Icons.contacts),
         _kv(Icons.person, S.name, c?.name),
         _kv(Icons.home_work, S.village, c?.village),
         _kv(Icons.phone, S.phone.split(' ').first, c?.phone),
@@ -429,12 +399,12 @@ class _JobDetailScreenState extends State<JobDetailScreen> {
         _kv(Icons.handyman, S.workDone, j.workDone),
         _kv(
           Icons.currency_rupee,
-          S.estimate,
+          S.estimateLabel,
           j.estimate == null ? null : '₹${j.estimate}',
         ),
         _kv(
           Icons.currency_rupee,
-          S.finalAmount,
+          S.totalLabel,
           j.finalAmount == null ? null : '₹${j.finalAmount}',
         ),
         _kv(
@@ -449,7 +419,7 @@ class _JobDetailScreenState extends State<JobDetailScreen> {
         if (j.status == 'delivered')
           _kv(
             Icons.payments,
-            S.paidQ,
+            S.payment,
             j.paid
                 ? '${S.paid} (${j.payMethod == 'upi' ? S.upiPay : S.cash})'
                 : S.notPaid,

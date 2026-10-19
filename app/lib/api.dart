@@ -381,6 +381,26 @@ class Api {
     return Job.fromJson(b as Map<String, dynamic>);
   }
 
+  /// Replaces any of the job's photos.
+  Future<Job> uploadPhotos(
+    int id, {
+    String? machine,
+    String? plate,
+    String? customer,
+  }) async {
+    final files = <String, String>{
+      if (machine != null) 'machine_photo': machine,
+      if (plate != null) 'plate_photo': plate,
+      if (customer != null) 'customer_photo': customer,
+    };
+    final b = await _multipart('/api/jobs/$id/photos', {}, files);
+    return Job.fromJson(b as Map<String, dynamic>);
+  }
+
+  Future<void> deleteJob(int id) async {
+    await _run(() => http.delete(_uri('/api/jobs/$id'), headers: headers));
+  }
+
   Future<NotifyResult> notify(
     int id, {
     int? finalAmount,

@@ -8,6 +8,7 @@ import '../api.dart';
 import '../strings.dart';
 import '../whatsapp.dart';
 import '../widgets/common.dart';
+import '../theme.dart';
 
 /// Preview of the customer message + QR + voice note, with WhatsApp send.
 class NotifyScreen extends StatefulWidget {
@@ -101,11 +102,20 @@ class _NotifyScreenState extends State<NotifyScreen> {
         children: [
           Container(
             padding: const EdgeInsets.all(14),
+            // Looks like a sent WhatsApp message, in WhatsApp's own light/dark colours.
             decoration: BoxDecoration(
-              color: const Color(0xFFDCF8C6),
+              color: AppTheme.isDark(context)
+                  ? const Color(0xFF005C4B)
+                  : const Color(0xFFDCF8C6),
               borderRadius: BorderRadius.circular(12),
             ),
-            child: Text(r.text, style: const TextStyle(fontSize: 21)),
+            child: Text(
+              r.text,
+              style: TextStyle(
+                fontSize: 21,
+                color: AppTheme.isDark(context) ? Colors.white : Colors.black,
+              ),
+            ),
           ),
           const SizedBox(height: 16),
           if (_preparing)
