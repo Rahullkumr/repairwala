@@ -1,4 +1,4 @@
-<p align="center"><img src="docs/images/icon.png" width="96" alt="Repairwala icon: a white wrench crossed by an orange lightning bolt on dark green"></p>
+![Hacktoberfest 2026 Open-Source AI Challenge Week 2: Side Hustle](docs/images/hfcw2.webp)
 
 # रिपेयरवाला · Repairwala
 
